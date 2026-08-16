@@ -511,7 +511,7 @@
       <h2>1. The Skeleton of Every Page</h2>
     </div>
   </div>
-  <p class="section-sub">Every HTML page has the same 4 bones. Learn this shape once — you will type it every single time.</p>
+  <p class="section-sub">A basic HTML page has this structure. Learn this shape once — you will type it often.</p>
 
   <div class="anatomy">
     <div class="tagline">&lt;tag&gt; content &lt;/tag&gt;</div>
@@ -563,7 +563,7 @@
   Hello World
 &lt;/body&gt;
 &lt;/html&gt;</pre>
-      <div class="mf-note">Every opening tag needs its OWN matching closing tag.</div>
+      <div class="mf-note">Most HTML tags have an opening and matching closing tag. Some tags, like <b class="mono">&lt;br&gt;</b> and <b class="mono">&lt;img&gt;</b>, do not.</div>
     </div>
   </div>
 
@@ -752,14 +752,14 @@
   <p class="section-sub">These two tags don't have plain text between them — they use an <b>attribute</b> (extra info) to say where to link or which picture to show.</p>
 
   <div class="anatomy">
-    <div class="tagline">&lt;img <span class="attr">src</span>=<span class="val">"data:image/svg+xml,..."</span>&gt;</div>
+    <div class="tagline">&lt;img <span class="attr">src</span>=<span class="val">"sun.jpg"</span>&gt;</div>
   </div>
   <p style="text-align:center;font-size:15px;color:#555;">🔵 attribute name &nbsp;=&nbsp; 🟢 value in quotes</p>
 
   <div class="pair">
     <div class="panel code">
       <div class="bar">🟠 Image</div>
-      <pre>&lt;<span class="kw">img</span> <span class="attr">src</span>=<span class="val">"data:image/svg+xml,..."</span> <span class="attr">width</span>=<span class="val">"100"</span>&gt;</pre>
+      <pre>&lt;<span class="kw">img</span> <span class="attr">src</span>=<span class="val">"sun.jpg"</span> <span class="attr">width</span>=<span class="val">"100"</span>&gt;</pre>
     </div>
     <div class="arrow-col">➜</div>
     <div class="panel result">
@@ -791,12 +791,12 @@
   <div class="mistake-fix">
     <div class="mf-box bad">
       <div class="mf-bar">❌ Broken</div>
-      <pre>&lt;img src=data:image/svg+xml,...&gt;</pre>
-      <div class="mf-note">Missing quotes around the image source — the browser gets confused.</div>
+      <pre>&lt;img src=sun.jpg&gt;</pre>
+      <div class="mf-note">Missing quotes around the image file name — the browser gets confused.</div>
     </div>
     <div class="mf-box good">
       <div class="mf-bar">✅ Fixed</div>
-      <pre>&lt;img src="data:image/svg+xml,..."&gt;</pre>
+      <pre>&lt;img src="sun.jpg"&gt;</pre>
       <div class="mf-note">Attribute values always go inside <b class="mono">"quotes"</b>.</div>
     </div>
   </div>
@@ -808,7 +808,7 @@
 &lt;img src=&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='80' viewBox='0 0 100 80'%3E%3Crect width='100' height='80' rx='8' fill='%23fde68a'/%3E%3Ccircle cx='50' cy='40' r='18' fill='%23f59e0b'/%3E%3C/svg%3E&quot; width=&quot;100&quot; alt=&quot;Yellow circle picture&quot;&gt;">&lt;a href="https://w3schools.com" target="_blank"&gt;Click me&lt;/a&gt;
 &lt;br&gt;
 &lt;img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='80' viewBox='0 0 100 80'%3E%3Crect width='100' height='80' rx='8' fill='%23fde68a'/%3E%3Ccircle cx='50' cy='40' r='18' fill='%23f59e0b'/%3E%3C/svg%3E" width="100" alt="Yellow circle picture"&gt;</textarea>
-    <p class="hint">This picture is embedded in the page, so it works offline. For a real local image, send the image file in the same folder as the HTML file.</p>
+    <p class="hint">This activity uses an embedded picture so it works offline. On a normal website, <b class="mono">src</b> usually contains an image file name, such as <b class="mono">sun.jpg</b>, or a web address. Send a local image file in the same folder as the HTML file.</p>
     <div class="btnrow">
       <button onclick="runTry('try4','out4')">▶ Show Result</button>
       <button class="reset" onclick="resetTry('try4','out4')">↺ Reset</button>
@@ -828,7 +828,7 @@
   <div class="anatomy">
     <div class="tagline">h1 { <span class="attr">color</span>: <span class="val">pink</span>; }</div>
   </div>
-  <p style="text-align:center;font-size:15px;color:#555;">🎯 which tag &nbsp;&nbsp;|&nbsp;&nbsp; 🔵 property &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 value &nbsp;&nbsp;|&nbsp;&nbsp; always ends with ;</p>
+  <p style="text-align:center;font-size:15px;color:#555;">🎯 which tag &nbsp;&nbsp;|&nbsp;&nbsp; 🔵 property &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 value &nbsp;&nbsp;|&nbsp;&nbsp; put <b>;</b> after each property</p>
 
   <div class="pair">
     <div class="panel code">
@@ -886,7 +886,7 @@
       <pre>h1 {
   color: pink
 }</pre>
-      <div class="mf-note">Missing the semicolon <b class="mono">;</b> after <b class="mono">pink</b> — CSS rules need one at the end of each line.</div>
+      <div class="mf-note">Missing the semicolon <b class="mono">;</b> after <b class="mono">pink</b>. We put <b class="mono">;</b> after each CSS property to mark the end of the declaration.</div>
     </div>
     <div class="mf-box good">
       <div class="mf-bar">✅ Fixed</div>
@@ -961,7 +961,7 @@
 
   <div class="tag-grid">
     <div class="tag-card"><div class="tag-icon">📦</div><div class="tag-name">div</div><div class="tag-desc">An invisible container box</div></div>
-    <div class="tag-card"><div class="tag-icon">⬅️➡️</div><div class="tag-name">float</div><div class="tag-desc">Push box left or right</div></div>
+    <div class="tag-card"><div class="tag-icon">⬅️➡️</div><div class="tag-name">float</div><div class="tag-desc">Can place boxes beside each other</div></div>
     <div class="tag-card"><div class="tag-icon">📍</div><div class="tag-name">position</div><div class="tag-desc">relative / absolute placing</div></div>
     <div class="tag-card"><div class="tag-icon">🏷️</div><div class="tag-name">id="name"</div><div class="tag-desc">Gives a box a unique name to style with #name</div></div>
   </div>
@@ -1013,7 +1013,7 @@
     <div class="section-icon">🎬</div>
     <div><h2>7. Video &amp; Sound — Seen, Not Heard</h2></div>
   </div>
-  <p class="section-sub">You can put video and sound on a page too. We focus on <b>video</b> because it's visual. Sound (<b class="mono">&lt;audio&gt;</b>) works the same way — but always add <b>captions</b> so everyone can understand it.</p>
+  <p class="section-sub">You can put video and sound on a page too. We focus on <b>video</b> because it's visual. Add <b>captions</b> to video, and a <b>transcript or text alternative</b> for audio so everyone can understand it.</p>
 
   <div class="pair">
     <div class="panel code">
@@ -1059,7 +1059,7 @@
           <span style="animation-delay:.2s"></span><span style="animation-delay:.3s"></span>
           <span style="animation-delay:.4s"></span>
         </div>
-        <div style="font-size:15px;color:#555;">A player bar appears — <b>no picture</b>, just a play button. That's why sound content needs captions/text nearby to describe it! 💬</div>
+        <div style="font-size:15px;color:#555;">A player bar appears — <b>no picture</b>, just a play button. Give sound content a transcript or visible text alternative nearby. 💬</div>
       </div>
     </div>
   </div>
@@ -1068,7 +1068,7 @@
     <li><b class="mono">controls</b> — shows play/pause buttons on screen</li>
     <li><b class="mono">width</b> / <b class="mono">height</b> — the size of the video box</li>
     <li><b class="mono">&lt;source&gt;</b> — tells the browser where the file is</li>
-    <li>Always pair audio with visible text or captions 👀</li>
+    <li>Pair video with captions, and audio with a transcript or visible text alternative 👀</li>
   </ul>
 </section>
 
@@ -1078,17 +1078,17 @@
     <div class="section-icon">📝</div>
     <div><h2>8. Forms — Collecting Answers</h2></div>
   </div>
-  <p class="section-sub">Forms let people type answers and press Submit. Every input has a <b class="mono">&lt;label&gt;</b> — the visible question text — next to it.</p>
+  <p class="section-sub">Forms let people type answers and press Submit. Every input has a <b class="mono">&lt;label&gt;</b> — the visible question text — connected to it.</p>
 
   <div class="pair">
     <div class="panel code">
       <div class="bar">🟠 Code</div>
       <pre>&lt;<span class="kw">form</span>&gt;
-  &lt;<span class="kw">label</span>&gt;Name:&lt;/<span class="kw">label</span>&gt;
-  &lt;<span class="kw">input</span> <span class="attr">type</span>=<span class="val">"text"</span>&gt;&lt;<span class="kw">br</span>&gt;
+  &lt;<span class="kw">label</span> <span class="attr">for</span>=<span class="val">"name"</span>&gt;Name:&lt;/<span class="kw">label</span>&gt;
+  &lt;<span class="kw">input</span> <span class="attr">id</span>=<span class="val">"name"</span> <span class="attr">type</span>=<span class="val">"text"</span>&gt;&lt;<span class="kw">br</span>&gt;
 
-  &lt;<span class="kw">label</span>&gt;Email:&lt;/<span class="kw">label</span>&gt;
-  &lt;<span class="kw">input</span> <span class="attr">type</span>=<span class="val">"email"</span>&gt;&lt;<span class="kw">br</span>&gt;
+  &lt;<span class="kw">label</span> <span class="attr">for</span>=<span class="val">"email"</span>&gt;Email:&lt;/<span class="kw">label</span>&gt;
+  &lt;<span class="kw">input</span> <span class="attr">id</span>=<span class="val">"email"</span> <span class="attr">type</span>=<span class="val">"email"</span>&gt;&lt;<span class="kw">br</span>&gt;
 
   &lt;<span class="kw">button</span>&gt;Submit&lt;/<span class="kw">button</span>&gt;
 &lt;/<span class="kw">form</span>&gt;</pre>
@@ -1098,24 +1098,24 @@
       <div class="bar">🔵 Result</div>
       <div class="result-inner">
         <div style="display:flex;flex-direction:column;gap:10px;max-width:220px;">
-          <label style="font-size:15px;font-weight:700;">Name:
-            <input type="text" style="display:block;width:100%;margin-top:3px;padding:6px;border:1px solid #ccc;border-radius:6px;">
-          </label>
-          <label style="font-size:15px;font-weight:700;">Email:
-            <input type="email" style="display:block;width:100%;margin-top:3px;padding:6px;border:1px solid #ccc;border-radius:6px;">
-          </label>
+          <label for="demo-name" style="font-size:15px;font-weight:700;">Name:</label>
+          <input id="demo-name" type="text" style="width:100%;margin-top:-7px;padding:6px;border:1px solid #ccc;border-radius:6px;">
+          <label for="demo-email" style="font-size:15px;font-weight:700;">Email:</label>
+          <input id="demo-email" type="email" style="width:100%;margin-top:-7px;padding:6px;border:1px solid #ccc;border-radius:6px;">
           <button style="background:var(--ink);color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;">Submit</button>
         </div>
       </div>
     </div>
   </div>
 
+  <p class="hint"><b class="mono">for="name"</b> connects the label to <b class="mono">id="name"</b>. Tapping a label then focuses its answer box.</p>
+
   <div class="tag-grid">
     <div class="tag-card"><div class="tag-icon">🏷️</div><div class="tag-name">label</div><div class="tag-desc">The question text</div></div>
     <div class="tag-card"><div class="tag-icon">⌨️</div><div class="tag-name">input type="text"</div><div class="tag-desc">A typed answer box</div></div>
     <div class="tag-card"><div class="tag-icon">📧</div><div class="tag-name">input type="email"</div><div class="tag-desc">Checks for a valid email</div></div>
     <div class="tag-card"><div class="tag-icon">📅</div><div class="tag-name">input type="date"</div><div class="tag-desc">A date picker</div></div>
-    <div class="tag-card"><div class="tag-icon">🔢</div><div class="tag-name">input type="number"</div><div class="tag-desc">Only numbers</div></div>
+    <div class="tag-card"><div class="tag-icon">🔢</div><div class="tag-name">input type="number"</div><div class="tag-desc">An input designed for entering numbers</div></div>
     <div class="tag-card"><div class="tag-icon">✅</div><div class="tag-name">required</div><div class="tag-desc">Must be filled before submit</div></div>
   </div>
 
@@ -1127,13 +1127,13 @@
   &lt;label&gt;Name:&lt;/label&gt;
   &lt;input type=text&gt;
 &lt;/form&gt;</pre>
-      <div class="mf-note">Missing the closing <b class="mono">&lt;/form&gt;</b>... wait it's there. Real bug: <b class="mono">type=text</b> has no quotes.</div>
+      <div class="mf-note"><b>The quotes are missing around <span class="mono">text</span>.</b> Attribute values should be written inside quotation marks.</div>
     </div>
     <div class="mf-box good">
       <div class="mf-bar">✅ Fixed</div>
       <pre>&lt;form&gt;
-  &lt;label&gt;Name:&lt;/label&gt;
-  &lt;input type="text"&gt;
+  &lt;label for="name"&gt;Name:&lt;/label&gt;
+  &lt;input id="name" type="text"&gt;
 &lt;/form&gt;</pre>
       <div class="mf-note">Same rule as always: attribute values need <b class="mono">"quotes"</b>.</div>
     </div>
@@ -1142,12 +1142,12 @@
   <div class="tryit">
     <div class="bar"><span>🟣 Try it yourself</span></div>
     <textarea id="try7" data-original="&lt;form&gt;
-  &lt;label&gt;Your Name:&lt;/label&gt;
-  &lt;input type=&quot;text&quot;&gt;&lt;br&gt;&lt;br&gt;
+  &lt;label for=&quot;your-name&quot;&gt;Your Name:&lt;/label&gt;
+  &lt;input id=&quot;your-name&quot; type=&quot;text&quot;&gt;&lt;br&gt;&lt;br&gt;
   &lt;button&gt;Submit&lt;/button&gt;
 &lt;/form&gt;">&lt;form&gt;
-  &lt;label&gt;Your Name:&lt;/label&gt;
-  &lt;input type="text"&gt;&lt;br&gt;&lt;br&gt;
+  &lt;label for="your-name"&gt;Your Name:&lt;/label&gt;
+  &lt;input id="your-name" type="text"&gt;&lt;br&gt;&lt;br&gt;
   &lt;button&gt;Submit&lt;/button&gt;
 &lt;/form&gt;</textarea>
     <div class="btnrow">
@@ -1277,8 +1277,8 @@
         <p><a href="#">Learn More About Diwali</a></p>
         <form onsubmit="return false">
           <h4>Share Your Favorite Festival</h4>
-          <input type="email" placeholder="Enter email" aria-label="Email"><br><br>
-          <input type="text" placeholder="Favorite festival" aria-label="Favorite festival"><br><br>
+          <label for="festival-email">Email:</label><input id="festival-email" type="email" placeholder="Enter email"><br><br>
+          <label for="festival-favourite">Favourite festival:</label><input id="festival-favourite" type="text" placeholder="Favourite festival"><br><br>
           <button type="submit">Submit</button>
         </form>
       </div>
@@ -1297,9 +1297,9 @@
         <div class="foundation-header">SUJAYA FOUNDATION</div>
         <form onsubmit="return false">
           <h2 style="color:orange;">Personal Information</h2>
-          <label>Full Name:<input type="text"></label>
-          <label>Email Address:<input type="email"></label>
-          <label>Phone Number:<input type="tel"></label>
+          <label for="foundation-name">Full Name:</label><input id="foundation-name" type="text">
+          <label for="foundation-email">Email Address:</label><input id="foundation-email" type="email">
+          <label for="foundation-phone">Phone Number:</label><input id="foundation-phone" type="tel">
           <br><button type="submit">Submit</button>
         </form>
       </div>
@@ -1318,6 +1318,7 @@
     <div class="section-icon">🧩</div>
     <div><h2>10. Mini Quiz &amp; DIY Coding Lab</h2></div>
   </div>
+
   <p class="section-sub">Small steps, no timer, and no penalty for a wrong answer. Tap a choice, read the helpful message, and try again whenever you want.</p>
 
   <div class="quiz-note"><b>How to use this:</b> Choose one answer at a time. Green means correct. Red means “try again” and explains why. The words and colours always say what happened, so you do not need to rely on colour alone.</div>
@@ -1354,6 +1355,39 @@
         <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz3feedback',false,'Try again. width changes how wide a box is.')"><code>width: green;</code></button>
       </div>
       <p class="quiz-feedback" id="quiz3feedback" role="status" aria-live="polite">Choose an answer.</p>
+    </article>
+
+    <article class="quiz-card">
+      <h3>4. Find the mistake</h3>
+      <p>What is wrong with <code>&lt;h1&gt;Hello&lt;h1&gt;</code>?</p>
+      <div class="choice-row" role="group" aria-label="Find the mistake in the heading code">
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz4feedback',true,'Correct! The second h1 needs a slash: close it with slash h1.')">The closing tag needs a slash</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz4feedback',false,'Try again. Hello is allowed inside a heading.')">The word Hello is wrong</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz4feedback',false,'Try again. h1 is a real heading tag.')">h1 is not a real tag</button>
+      </div>
+      <p class="quiz-feedback" id="quiz4feedback" role="status" aria-live="polite">Choose an answer.</p>
+    </article>
+
+    <article class="quiz-card">
+      <h3>5. Make a numbered list</h3>
+      <p>Which tag starts a list with 1, 2, 3?</p>
+      <div class="choice-row" role="group" aria-label="Choose the numbered list tag">
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz5feedback',false,'Try again. ul makes a dotted list.')"><code>&lt;ul&gt;</code> Dotted list</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz5feedback',true,'Correct! ol means ordered list, so it uses numbers.')"><code>&lt;ol&gt;</code> Numbered list</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz5feedback',false,'Try again. li is one item inside a list.')"><code>&lt;li&gt;</code> One list item</button>
+      </div>
+      <p class="quiz-feedback" id="quiz5feedback" role="status" aria-live="polite">Choose an answer.</p>
+    </article>
+
+    <article class="quiz-card">
+      <h3>6. Name a CSS box</h3>
+      <p>In CSS, what does <code>#left</code> mean?</p>
+      <div class="choice-row" role="group" aria-label="Choose the meaning of the CSS selector number left">
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz6feedback',true,'Correct! The hash means an element with id left.')">The box with <code>id="left"</code></button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz6feedback',false,'Try again. A hash in CSS does not mean a heading.')">The biggest heading</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz6feedback',false,'Try again. A hash in CSS does not mean the left side of the screen.')">Everything on the left side</button>
+      </div>
+      <p class="quiz-feedback" id="quiz6feedback" role="status" aria-live="polite">Choose an answer.</p>
     </article>
   </div>
 
@@ -1411,7 +1445,7 @@
     <div class="g-item"><div class="g-tag">border</div><div class="g-def">Outline around a box</div></div>
     <div class="g-item"><div class="g-tag">border-radius</div><div class="g-def">Rounds the corners</div></div>
     <div class="g-item"><div class="g-tag">text-align</div><div class="g-def">left / center / right</div></div>
-    <div class="g-item"><div class="g-tag">float</div><div class="g-def">Push a box left or right</div></div>
+    <div class="g-item"><div class="g-tag">float</div><div class="g-def">Can place boxes beside each other</div></div>
     <div class="g-item"><div class="g-tag">position</div><div class="g-def">relative / absolute placing</div></div>
     <div class="g-item"><div class="g-tag">id="name"</div><div class="g-def">A unique name, styled with #name</div></div>
     <div class="g-item"><div class="g-tag">controls</div><div class="g-def">Shows play/pause buttons</div></div>
@@ -1529,8 +1563,8 @@ window.addEventListener('DOMContentLoaded', () => {
   <p><a href="#">Learn More About Diwali</a></p>
   <form>
     <h4>Share Your Favorite Festival</h4>
-    <input type="email" placeholder="Enter email" required><br><br>
-    <input type="text" placeholder="Favorite festival" required><br><br>
+    <label for="festival-email-code">Email:</label><input id="festival-email-code" type="email" placeholder="Enter email" required><br><br>
+    <label for="festival-favourite-code">Favorite festival:</label><input id="festival-favourite-code" type="text" placeholder="Favorite festival" required><br><br>
     <button>Submit</button>
   </form>
   </body></html>`;
@@ -1547,9 +1581,9 @@ window.addEventListener('DOMContentLoaded', () => {
   <div id="header">SUJAYA FOUNDATION</div>
   <form>
     <h2 style="color:orange;">Personal Information</h2>
-    <label>Full Name:</label><input type="text">
-    <label>Email Address:</label><input type="email">
-    <label>Phone Number:</label><input type="tel">
+    <label for="full-name">Full Name:</label><input id="full-name" type="text">
+    <label for="email-address">Email Address:</label><input id="email-address" type="email">
+    <label for="phone-number">Phone Number:</label><input id="phone-number" type="tel">
     <br><br><button>Submit</button>
   </form>
   </body></html>`;
