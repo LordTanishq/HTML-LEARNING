@@ -217,7 +217,9 @@
     .tryit textarea{ font-size:14px; min-height:130px; }
     .tryit .btnrow{ flex-direction:column; }
     .tryit .btnrow button{ width:100%; padding:14px 20px; }
-    .tryit .preview-slot iframe, .build-along .preview-slot iframe{ height:120px; }
+    .diy-lab .btnrow{ flex-direction:column; }
+    .diy-lab .btnrow button{ width:100%; }
+    .tryit .preview-slot iframe, .build-along .preview-slot iframe, .diy-lab .preview-slot iframe{ height:120px; }
 
     /* stack the 2-box CSS layout demo on narrow screens */
     #s6 .result-inner[style*="display:flex"] > div{
@@ -296,7 +298,7 @@
     font-size:15px; font-weight:700; text-align:center;
   }
   .preview-slot:empty::before{ content:"Tap Show Result to load your preview."; }
-  .tryit .preview-slot iframe, .build-along .preview-slot iframe{
+  .tryit .preview-slot iframe, .build-along .preview-slot iframe, .diy-lab .preview-slot iframe{
     width:100%; height:140px; border:2px solid var(--ink); border-radius:10px;
     margin-top:12px; background:#fff;
   }
@@ -416,6 +418,43 @@
   }
   .ba-target .lbl{ font-size:16px; font-weight:800; color:var(--result); text-transform:uppercase; margin-bottom:8px; }
 
+  /* ===== QUIZ + DIY LAB ===== */
+  .quiz-note{
+    background:#fff; border-left:5px solid var(--try); border-radius:10px;
+    padding:14px 16px; margin:0 0 24px; color:#4b4b5e;
+  }
+  .quiz-grid{ display:grid; grid-template-columns:repeat(auto-fit, minmax(250px,1fr)); gap:18px; }
+  .quiz-card{
+    background:#fff; border:3px solid var(--ink); border-radius:14px; padding:18px;
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .quiz-card h3{ font-size:20px; }
+  .choice-row{ display:grid; gap:10px; margin-top:14px; }
+  .choice-btn{
+    min-height:52px; padding:10px 14px; border:2px solid var(--ink); border-radius:10px;
+    background:#fff; color:var(--ink); font:700 16px/1.35 inherit; text-align:left; cursor:pointer;
+  }
+  .choice-btn:hover{ background:#f4edff; }
+  .choice-btn.correct{ background:#dcfce7; border-color:var(--ok); }
+  .choice-btn.incorrect{ background:#fee2e2; border-color:var(--bad); }
+  .quiz-feedback{ min-height:30px; margin:14px 0 0; font-weight:700; }
+  .quiz-feedback.success{ color:#166534; }
+  .quiz-feedback.try-again{ color:#991b1b; }
+  .diy-lab{
+    margin-top:30px; padding:20px; border:3px dashed var(--result); border-radius:14px; background:#f0fbfd;
+  }
+  .diy-lab textarea{
+    width:100%; min-height:145px; padding:12px; border:2px solid var(--result); border-radius:10px;
+    resize:vertical; background:#fff; font:16px/1.5 monospace;
+  }
+  .diy-lab .btnrow{ display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  .diy-lab button{
+    min-height:46px; padding:10px 18px; border:0; border-radius:24px;
+    background:var(--result); color:#fff; font:800 16px inherit; cursor:pointer;
+  }
+  .diy-lab button.reset{ background:#fff; color:var(--ink); border:2px solid var(--ink); }
+  .diy-lab .preview-slot:empty::before{ content:"Tap Run My Code to see your page."; }
+
   /* ===== GLOSSARY ===== */
   .glossary-strip{
     display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr));
@@ -440,7 +479,8 @@
   <a href="#s7" data-sec="s7"><span class="num"><span>7</span></span> Video</a>
   <a href="#s8" data-sec="s8"><span class="num"><span>8</span></span> Forms</a>
   <a href="#s9" data-sec="s9"><span class="num"><span>9</span></span> Build-Alongs</a>
-  <a href="#s10" data-sec="s10"><span class="num"><span>10</span></span> Glossary</a>
+  <a href="#s10" data-sec="s10"><span class="num"><span>10</span></span> Quiz &amp; DIY</a>
+  <a href="#s11" data-sec="s11"><span class="num"><span>11</span></span> Glossary</a>
 </nav>
 <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
 
@@ -1272,11 +1312,71 @@
 
 </section>
 
-<!-- ===================== 10. GLOSSARY ===================== -->
+<!-- ===================== 10. QUIZ + DIY ===================== -->
 <section id="s10">
   <div class="section-head">
+    <div class="section-icon">🧩</div>
+    <div><h2>10. Mini Quiz &amp; DIY Coding Lab</h2></div>
+  </div>
+  <p class="section-sub">Small steps, no timer, and no penalty for a wrong answer. Tap a choice, read the helpful message, and try again whenever you want.</p>
+
+  <div class="quiz-note"><b>How to use this:</b> Choose one answer at a time. Green means correct. Red means “try again” and explains why. The words and colours always say what happened, so you do not need to rely on colour alone.</div>
+
+  <div class="quiz-grid">
+    <article class="quiz-card">
+      <h3>1. Make a big title</h3>
+      <p>Which tag makes the biggest page heading?</p>
+      <div class="choice-row" role="group" aria-label="Choose the biggest heading tag">
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz1feedback',true,'Correct! h1 is the biggest heading.')"><code>&lt;h1&gt;</code> Big heading</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz1feedback',false,'Try again. p makes a normal paragraph, not a big title.')"><code>&lt;p&gt;</code> Normal paragraph</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz1feedback',false,'Try again. img puts a picture on the page.')"><code>&lt;img&gt;</code> Picture</button>
+      </div>
+      <p class="quiz-feedback" id="quiz1feedback" role="status" aria-live="polite">Choose an answer.</p>
+    </article>
+
+    <article class="quiz-card">
+      <h3>2. Start a new line</h3>
+      <p>Which tag moves the next word to a new line?</p>
+      <div class="choice-row" role="group" aria-label="Choose the line break tag">
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz2feedback',false,'Try again. b makes text bold.')"><code>&lt;b&gt;</code> Bold text</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz2feedback',true,'Correct! br means line break.')"><code>&lt;br&gt;</code> Line break</button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz2feedback',false,'Try again. ul starts a dotted list.')"><code>&lt;ul&gt;</code> Dotted list</button>
+      </div>
+      <p class="quiz-feedback" id="quiz2feedback" role="status" aria-live="polite">Choose an answer.</p>
+    </article>
+
+    <article class="quiz-card">
+      <h3>3. Colour the words</h3>
+      <p>Which CSS line changes text to green?</p>
+      <div class="choice-row" role="group" aria-label="Choose the CSS text colour rule">
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz3feedback',false,'Try again. background-color changes the colour behind the text.')"><code>background-color: green;</code></button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz3feedback',true,'Correct! color changes the colour of the words.')"><code>color: green;</code></button>
+        <button type="button" class="choice-btn" onclick="answerQuiz(this,'quiz3feedback',false,'Try again. width changes how wide a box is.')"><code>width: green;</code></button>
+      </div>
+      <p class="quiz-feedback" id="quiz3feedback" role="status" aria-live="polite">Choose an answer.</p>
+    </article>
+  </div>
+
+  <div class="diy-lab">
+    <h3>🎨 Make your own tiny page</h3>
+    <p>Change only the words first. When you feel ready, try changing <code>h1</code> to <code>h2</code>, or add another <code>&lt;p&gt;</code> line. Then press <b>Run My Code</b>.</p>
+    <label for="diyCode"><b>Your code:</b></label>
+    <textarea id="diyCode" spellcheck="false" data-original="&lt;h1&gt;My Favourite Thing&lt;/h1&gt;
+&lt;p&gt;I made this page myself!&lt;/p&gt;">&lt;h1&gt;My Favourite Thing&lt;/h1&gt;
+&lt;p&gt;I made this page myself!&lt;/p&gt;</textarea>
+    <div class="btnrow">
+      <button type="button" onclick="runDiyCode()">▶ Run My Code</button>
+      <button type="button" class="reset" onclick="resetTry('diyCode','diyOutput')">↺ Start Again</button>
+    </div>
+    <div class="preview-slot" id="diyOutput" aria-live="polite"></div>
+  </div>
+</section>
+
+<!-- ===================== 11. GLOSSARY ===================== -->
+<section id="s11">
+  <div class="section-head">
     <div class="section-icon">📖</div>
-    <div><h2>10. Glossary — Every Tag in One Place</h2></div>
+    <div><h2>11. Glossary — Every Tag in One Place</h2></div>
   </div>
   <p class="section-sub">A cheat sheet. Keep this open in another tab while you build your own page.</p>
 
@@ -1354,7 +1454,7 @@ function resetTry(taId, outId){
 }
 
 // ===== progress tracking =====
-const sectionIds = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
+const sectionIds = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11'];
 const doneSections = new Set();
 
 function markDone(taId){
@@ -1362,6 +1462,30 @@ function markDone(taId){
   const el = document.getElementById(taId);
   const sec = el.closest('section');
   if(sec){ doneSections.add(sec.id); updateProgress(); }
+}
+
+function answerQuiz(button, feedbackId, correct, message){
+  const card = button.closest('.quiz-card');
+  card.querySelectorAll('.choice-btn').forEach(choice => {
+    choice.classList.remove('correct','incorrect');
+    choice.setAttribute('aria-pressed','false');
+  });
+  button.classList.add(correct ? 'correct' : 'incorrect');
+  button.setAttribute('aria-pressed','true');
+  const feedback = document.getElementById(feedbackId);
+  feedback.textContent = message;
+  feedback.className = 'quiz-feedback ' + (correct ? 'success' : 'try-again');
+  if(correct){
+    doneSections.add('s10');
+    updateProgress();
+  }
+}
+
+function runDiyCode(){
+  const code = document.getElementById('diyCode').value;
+  showPreview('diyOutput', code);
+  doneSections.add('s10');
+  updateProgress();
 }
 
 function updateProgress(){
