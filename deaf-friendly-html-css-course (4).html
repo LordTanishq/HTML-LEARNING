@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code &amp; See — Learn HTML &amp; CSS Visually</title>
+<style>
+  :root{
+    --ink:#1B1B2F;
+    --paper:#FDF8F0;
+    --paper-dim:#F3ECDD;
+    --code:#FF6B35;
+    --result:#0891B2;
+    --try:#8B5CF6;
+    --line:#E4D9C3;
+    --ok:#16A34A;
+    --bad:#DC2626;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth; font-size:19px;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height:1.65;
+    font-size:1rem;
+  }
+  h1,h2,h3,h4{
+    font-family:"Segoe UI", Arial, sans-serif;
+    letter-spacing:-0.01em;
+    margin:0 0 .4em 0;
+  }
+  code, .mono{
+    font-family:"Consolas","SF Mono", Menlo, monospace;
+  }
+  :focus-visible{ outline:3px solid var(--try); outline-offset:2px; }
+
+  /* ===== TOP NAV TRAIL ===== */
+  .trail{
+    position:sticky; top:0; z-index:50;
+    background:var(--ink);
+    padding:10px 16px;
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+    scrollbar-width:thin;
+  }
+  .trail a{
+    flex:0 0 auto;
+    position:relative;
+    display:flex; align-items:center; gap:6px;
+    text-decoration:none;
+    color:#fff;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.15);
+    padding:8px 14px 8px 6px;
+    border-radius:20px;
+    font-size:15px;
+    white-space:nowrap;
+    transition:.15s;
+    min-height:38px;
+  }
+  .trail a:hover{ background:var(--code); border-color:var(--code); }
+  .trail .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px;height:22px;border-radius:50%;
+    background:var(--code); color:#fff; font-size:12px; font-weight:700;
+    transition:.2s; flex:0 0 auto;
+  }
+  .trail a.done .num{ background:var(--ok); }
+  .trail a.done .num::after{ content:"✓"; }
+  .trail a.done .num span{ display:none; }
+  .progress-track{
+    position:sticky; top:44px; z-index:49;
+    height:4px; background:var(--line);
+  }
+  .progress-fill{
+    height:100%; width:0%; background:linear-gradient(90deg,var(--code),var(--result));
+    transition:width .3s ease;
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    padding:60px 20px 40px;
+    text-align:center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(255,107,53,.10), transparent 40%),
+      radial-gradient(circle at 80% 0%, rgba(8,145,178,.12), transparent 45%),
+      var(--paper);
+    border-bottom:3px solid var(--ink);
+  }
+  .hero .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:16px; font-weight:700; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--try);
+    background:#fff; border:2px solid var(--try);
+    padding:6px 14px; border-radius:30px; margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(32px, 6vw, 64px);
+    font-weight:800;
+    margin-bottom:14px;
+  }
+  .hero h1 .accent{ color:var(--code); }
+  .hero p{
+    font-size:18px; max-width:600px; margin:0 auto;
+    color:#4b4b5e;
+  }
+  .hero-demo{
+    max-width:720px; margin:36px auto 0;
+    display:grid; grid-template-columns:1fr auto 1fr;
+    align-items:center; gap:14px;
+  }
+  .hero-demo .arrow{ font-size:28px; color:var(--ink); }
+  .demo-box{
+    border:3px solid var(--ink);
+    border-radius:14px;
+    background:#fff;
+    text-align:left;
+    overflow:hidden;
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .demo-box .tag{
+    font-size:15px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+    padding:6px 12px; color:#fff;
+  }
+  .demo-box.code .tag{ background:var(--code); }
+  .demo-box.result .tag{ background:var(--result); }
+  .demo-box pre{ margin:0; padding:14px; font-size:15px; overflow-x:auto; }
+  .demo-box .result-view{ padding:20px; font-size:18px; }
+
+  /* ===== SECTIONS ===== */
+  section{
+    max-width:980px;
+    margin:0 auto;
+    padding:70px 20px;
+    border-bottom:1px dashed var(--line);
+    scroll-margin-top:70px;
+  }
+  section:last-of-type{ border-bottom:none; }
+  .section-head{
+    display:flex; align-items:center; gap:16px;
+    margin-bottom:8px;
+  }
+  .section-icon{
+    flex:0 0 auto;
+    width:52px;height:52px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+    background:var(--ink); color:#fff;
+  }
+  .section-head h2{ font-size:30px; }
+  .section-sub{ color:#555; font-size:18px; margin-bottom:34px; max-width:640px; }
+
+  /* Code <-> Result pair, THE signature layout */
+  .pair{
+    display:grid;
+    grid-template-columns:1fr 40px 1fr;
+    align-items:stretch;
+    gap:0;
+    margin:22px 0;
+  }
+  .pair .arrow-col{
+    display:flex; align-items:center; justify-content:center;
+    font-size:26px; color:var(--ink);
+  }
+  .panel{
+    border:3px solid var(--ink);
+    border-radius:14px;
+    overflow:hidden;
+    background:#fff;
+  }
+  .panel .bar{
+    display:flex; align-items:center; gap:8px;
+    font-size:16px; font-weight:800; text-transform:uppercase; letter-spacing:.06em;
+    padding:8px 14px; color:#fff;
+  }
+  .panel.code .bar{ background:var(--code); }
+  .panel.result .bar{ background:var(--result); }
+  .panel pre{
+    margin:0; padding:16px; font-size:16px; line-height:1.6;
+    overflow-x:auto; background:#fdfdfd;
+  }
+  .panel .result-inner{ padding:20px; min-height:40px; }
+
+  /* keyword highlight inside code */
+  .kw{ color:#c026d3; font-weight:700; }
+  .attr{ color:#0891B2; }
+  .val{ color:#16a34a; }
+  .cmt{ color:#9ca3af; font-style:italic; }
+
+  @media (max-width:720px){
+    html{ font-size:16px; }
+    .pair{ grid-template-columns:1fr; }
+    .pair .arrow-col{ transform:rotate(90deg); padding:4px 0; }
+    .hero-demo{ grid-template-columns:1fr; }
+    .hero-demo .arrow{ transform:rotate(90deg); }
+    .mistake-fix{ grid-template-columns:1fr !important; }
+
+    .hero{ padding:40px 16px 30px; }
+    section{ padding:44px 16px; }
+    .section-head{ gap:12px; }
+    .section-icon{ width:42px; height:42px; font-size:20px; border-radius:11px; }
+    .section-head h2{ font-size:23px; }
+
+    .panel pre, .demo-box pre, details.code-toggle pre, .mf-box pre{
+      font-size:14px; padding:12px;
+    }
+    .anatomy .tagline{ font-size:19px; padding:16px 18px; white-space:normal; word-break:break-word; }
+
+    .tag-grid{ grid-template-columns:repeat(2, 1fr); }
+    .glossary-strip{ grid-template-columns:1fr 1fr; }
+
+    .tryit textarea{ font-size:14px; min-height:130px; }
+    .tryit .btnrow{ flex-direction:column; }
+    .tryit .btnrow button{ width:100%; padding:14px 20px; }
+    .tryit iframe, .build-along iframe{ height:120px; }
+
+    .project-card iframe{ height:220px; }
+
+    /* stack the 2-box CSS layout demo on narrow screens */
+    #s6 .result-inner[style*="display:flex"] > div{
+      width:100% !important;
+    }
+    #s6 .result-inner[style*="display:flex"]{ flex-direction:column !important; }
+  }
+
+  @media (max-width:400px){
+    html{ font-size:15px; }
+    .tag-grid{ grid-template-columns:1fr; }
+    .glossary-strip{ grid-template-columns:1fr; }
+    .hero h1{ font-size:34px; }
+  }
+
+  /* tag anatomy diagram */
+  .anatomy{
+    display:flex; justify-content:center; margin:30px 0;
+  }
+  .anatomy .tagline{
+    font-family:monospace; font-size:28px; background:#fff;
+    border:3px solid var(--ink); border-radius:12px;
+    padding:24px 30px; position:relative;
+    box-shadow:6px 6px 0 var(--ink);
+  }
+
+  /* step cards */
+  .steps{ display:flex; flex-direction:column; gap:14px; }
+  .step{
+    display:flex; gap:16px; align-items:flex-start;
+    background:#fff; border:2px solid var(--line); border-radius:12px; padding:16px 18px;
+  }
+  .step .n{
+    flex:0 0 auto; width:32px;height:32px;border-radius:50%;
+    background:var(--try); color:#fff; font-weight:800;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+
+  /* icon grid (tags reference) */
+  .tag-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(150px,1fr));
+    gap:12px; margin-top:20px;
+  }
+  .tag-card{
+    background:#fff; border:2px solid var(--line); border-radius:12px;
+    padding:14px; text-align:center;
+  }
+  .tag-card .tag-name{
+    font-family:monospace; font-weight:800; color:var(--code); font-size:16px;
+  }
+  .tag-card .tag-desc{ font-size:16px; color:#555; margin-top:4px; }
+  .tag-card .tag-icon{ font-size:26px; margin-bottom:6px; }
+
+  /* try-it box */
+  .tryit{
+    border:3px dashed var(--try);
+    border-radius:14px;
+    background:#faf5ff;
+    padding:20px;
+    margin-top:26px;
+  }
+  .tryit .bar{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    font-weight:800; color:var(--try); margin-bottom:10px; font-size:16px;
+    text-transform:uppercase; letter-spacing:.05em;
+  }
+  .tryit textarea{
+    width:100%; min-height:110px; font-family:monospace; font-size:16px;
+    border:2px solid var(--try); border-radius:10px; padding:12px;
+    resize:vertical; background:#fff;
+  }
+  .tryit iframe{
+    width:100%; height:140px; border:2px solid var(--ink); border-radius:10px;
+    margin-top:12px; background:#fff;
+  }
+  .tryit .btnrow{ display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
+  .tryit button{
+    background:var(--try); color:#fff; border:none;
+    padding:10px 20px; border-radius:30px; font-weight:800; font-size:16px;
+    cursor:pointer;
+  }
+  .tryit button:hover{ background:#7c3aed; }
+  .tryit button.reset{ background:#fff; color:var(--ink); border:2px solid var(--ink); }
+  .tryit button.reset:hover{ background:var(--paper-dim); }
+  .tryit .hint{ font-size:16px; color:#7c3aed; margin-top:8px; }
+
+  /* caption / sound visual explainer */
+  .wave{
+    display:flex; align-items:flex-end; gap:3px; height:40px;
+  }
+  .wave span{
+    width:5px; background:var(--result); border-radius:2px;
+    animation:bounce 1.2s ease-in-out infinite;
+  }
+  @keyframes bounce{ 0%,100%{height:8px;} 50%{height:34px;} }
+
+  /* mini project cards */
+  .project-card{
+    background:#fff; border:3px solid var(--ink); border-radius:16px;
+    overflow:hidden; margin-bottom:26px;
+    box-shadow:6px 6px 0 var(--ink);
+  }
+  .project-card .phead{
+    background:var(--ink); color:#fff; padding:14px 20px;
+    display:flex; align-items:center; gap:10px; font-weight:800;
+  }
+  .project-card .pbody{ padding:20px; }
+  .project-card iframe{
+    width:100%; height:260px; border:2px solid var(--line); border-radius:10px; margin-top:14px;
+  }
+
+  details.code-toggle{
+    margin-top:12px; border:2px solid var(--line); border-radius:10px; overflow:hidden;
+  }
+  details.code-toggle summary{
+    cursor:pointer; padding:10px 14px; font-weight:700; background:var(--paper-dim);
+    list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  details.code-toggle summary::-webkit-details-marker{ display:none; }
+  details.code-toggle pre{ margin:0; padding:16px; font-size:15px; overflow-x:auto; }
+
+  footer{
+    text-align:center; padding:50px 20px; color:#666; font-size:16px;
+  }
+
+  .badge{
+    display:inline-block; background:var(--ok); color:#fff; font-size:15px;
+    font-weight:800; padding:3px 10px; border-radius:20px; text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+
+  .checklist{ list-style:none; padding:0; margin:18px 0 0; }
+  .checklist li{
+    display:flex; align-items:center; gap:10px; padding:8px 0;
+    font-size:15px; border-bottom:1px solid var(--line);
+  }
+  .checklist li::before{
+    content:"✓"; flex:0 0 auto; width:24px;height:24px;border-radius:50%;
+    background:var(--ok); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:800;
+  }
+
+  /* ===== MISTAKE / FIX ===== */
+  .mistake-fix{
+    display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0 30px;
+  }
+  .mf-box{
+    border-radius:14px; overflow:hidden; border:3px solid;
+  }
+  .mf-box.bad{ border-color:var(--bad); }
+  .mf-box.good{ border-color:var(--ok); }
+  .mf-box .mf-bar{
+    display:flex; align-items:center; gap:8px; padding:8px 14px;
+    font-weight:800; font-size:15px; color:#fff;
+  }
+  .mf-box.bad .mf-bar{ background:var(--bad); }
+  .mf-box.good .mf-bar{ background:var(--ok); }
+  .mf-box pre{ margin:0; padding:14px; font-size:16px; background:#fff; overflow-x:auto; line-height:1.55; }
+  .mf-box .mf-note{
+    font-size:12.5px; padding:10px 14px; background:var(--paper-dim); border-top:1px solid var(--line);
+  }
+  .mf-box.bad .mf-note{ color:#991B1B; }
+  .mf-box.good .mf-note{ color:#166534; }
+
+  /* ===== BUILD-ALONG ===== */
+  .build-along{
+    border:3px solid var(--ink); border-radius:16px; overflow:hidden;
+    margin:24px 0; box-shadow:6px 6px 0 var(--ink); background:#fff;
+  }
+  .build-along .ba-head{
+    background:linear-gradient(90deg,var(--try),#a855f7); color:#fff;
+    padding:14px 20px; font-weight:800; display:flex; align-items:center; gap:10px;
+  }
+  .build-along .ba-body{ padding:20px; }
+  .ba-target{
+    border:2px dashed var(--result); border-radius:10px; padding:16px; margin-bottom:16px; background:#f0fbfd;
+  }
+  .ba-target .lbl{ font-size:16px; font-weight:800; color:var(--result); text-transform:uppercase; margin-bottom:8px; }
+
+  /* ===== GLOSSARY ===== */
+  .glossary-strip{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(190px,1fr));
+    gap:10px; margin-top:20px;
+  }
+  .g-item{
+    background:#fff; border:2px solid var(--line); border-radius:10px; padding:12px;
+  }
+  .g-item .g-tag{ font-family:monospace; font-weight:800; color:var(--code); font-size:16px; }
+  .g-item .g-def{ font-size:16px; color:#555; margin-top:3px; }
+</style>
+</head>
+<body>
+
+<nav class="trail" id="trail">
+  <a href="#s1" data-sec="s1"><span class="num"><span>1</span></span> Skeleton</a>
+  <a href="#s2" data-sec="s2"><span class="num"><span>2</span></span> Text</a>
+  <a href="#s3" data-sec="s3"><span class="num"><span>3</span></span> Lists</a>
+  <a href="#s4" data-sec="s4"><span class="num"><span>4</span></span> Links &amp; Images</a>
+  <a href="#s5" data-sec="s5"><span class="num"><span>5</span></span> Colors &amp; Style</a>
+  <a href="#s6" data-sec="s6"><span class="num"><span>6</span></span> Boxes &amp; Layout</a>
+  <a href="#s7" data-sec="s7"><span class="num"><span>7</span></span> Video</a>
+  <a href="#s8" data-sec="s8"><span class="num"><span>8</span></span> Forms</a>
+  <a href="#s9" data-sec="s9"><span class="num"><span>9</span></span> Build-Alongs</a>
+  <a href="#s10" data-sec="s10"><span class="num"><span>10</span></span> Glossary</a>
+</nav>
+<div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <div class="eyebrow">👁️ A visual way to learn code</div>
+  <h1>Code &amp; See<br><span class="accent">HTML + CSS</span></h1>
+  <p>Every lesson shows two boxes: what you <b>type</b>, and what <b>appears</b>. No sound needed — just watch the code become the page.</p>
+
+  <div class="hero-demo">
+    <div class="demo-box code">
+      <div class="tag">🟠 You type</div>
+      <pre>&lt;h1&gt;Hello!&lt;/h1&gt;</pre>
+    </div>
+    <div class="arrow">➜</div>
+    <div class="demo-box result">
+      <div class="tag">🔵 You see</div>
+      <div class="result-view"><h1 style="margin:0;font-size:22px;">Hello!</h1></div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== 1. SKELETON ===================== -->
+<section id="s1">
+  <div class="section-head">
+    <div class="section-icon">🦴</div>
+    <div>
+      <h2>1. The Skeleton of Every Page</h2>
+    </div>
+  </div>
+  <p class="section-sub">Every HTML page has the same 4 bones. Learn this shape once — you will type it every single time.</p>
+
+  <div class="anatomy">
+    <div class="tagline">&lt;tag&gt; content &lt;/tag&gt;</div>
+  </div>
+  <p style="text-align:center;color:#555;font-size:16px;">🟣 opening tag &nbsp;&nbsp;|&nbsp;&nbsp; content sits inside &nbsp;&nbsp;|&nbsp;&nbsp; 🔴 closing tag has a <b>/</b></p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 index.html</div>
+      <pre>&lt;<span class="kw">html</span>&gt;
+  &lt;<span class="kw">head</span>&gt;
+    &lt;<span class="kw">title</span>&gt;My Page&lt;/<span class="kw">title</span>&gt;
+  &lt;/<span class="kw">head</span>&gt;
+  &lt;<span class="kw">body</span>&gt;
+    Hello World
+  &lt;/<span class="kw">body</span>&gt;
+&lt;/<span class="kw">html</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Browser tab</div>
+      <div class="result-inner">
+        <div style="border:1px solid #ccc;border-radius:8px;overflow:hidden;">
+          <div style="background:#eee;padding:6px 10px;font-size:16px;border-bottom:1px solid #ccc;">📄 My Page</div>
+          <div style="padding:14px;">Hello World</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="n">1</div><div><b class="mono">&lt;html&gt;</b> — wraps the WHOLE page. Everything lives inside it.</div></div>
+    <div class="step"><div class="n">2</div><div><b class="mono">&lt;head&gt;</b> — hidden info. Only the <b class="mono">&lt;title&gt;</b> shows (in the browser tab).</div></div>
+    <div class="step"><div class="n">3</div><div><b class="mono">&lt;body&gt;</b> — everything people actually SEE on the page goes here.</div></div>
+  </div>
+
+  <p style="font-weight:800; margin-top:34px; display:flex; align-items:center; gap:8px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>&lt;body&gt;
+  Hello World
+&lt;/html&gt;</pre>
+      <div class="mf-note">Missing <b class="mono">&lt;/body&gt;</b> — the closing tag doesn't match!</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>&lt;body&gt;
+  Hello World
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+      <div class="mf-note">Every opening tag needs its OWN matching closing tag.</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try1" data-original="&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;My Page&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    Hello World
+  &lt;/body&gt;
+&lt;/html&gt;">&lt;html&gt;
+  &lt;head&gt;&lt;title&gt;My Page&lt;/title&gt;&lt;/head&gt;
+  &lt;body&gt;
+    Hello World
+  &lt;/body&gt;
+&lt;/html&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try1','out1')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try1','out1')">↺ Reset</button>
+    </div>
+    <iframe id="out1" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 2. TEXT ===================== -->
+<section id="s2">
+  <div class="section-head">
+    <div class="section-icon">🔤</div>
+    <div><h2>2. Text: Headings &amp; Paragraphs</h2></div>
+  </div>
+  <p class="section-sub">Text tags control size and importance — from a giant title down to a small note.</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>&lt;<span class="kw">h1</span>&gt;Biggest Title&lt;/<span class="kw">h1</span>&gt;
+&lt;<span class="kw">h2</span>&gt;Smaller Title&lt;/<span class="kw">h2</span>&gt;
+&lt;<span class="kw">h3</span>&gt;Even Smaller&lt;/<span class="kw">h3</span>&gt;
+&lt;<span class="kw">p</span>&gt;Normal paragraph text.&lt;/<span class="kw">p</span>&gt;
+&lt;<span class="kw">b</span>&gt;Bold&lt;/<span class="kw">b&gt;</span> &lt;<span class="kw">i</span>&gt;Italic&lt;/<span class="kw">i</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner">
+        <h1 style="margin:.2em 0;font-size:26px;">Biggest Title</h1>
+        <h2 style="margin:.2em 0;font-size:20px;">Smaller Title</h2>
+        <h3 style="margin:.2em 0;font-size:16px;">Even Smaller</h3>
+        <p style="margin:.4em 0;">Normal paragraph text.</p>
+        <p style="margin:0;"><b>Bold</b> <i>Italic</i></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="tag-grid">
+    <div class="tag-card"><div class="tag-icon">📢</div><div class="tag-name">&lt;h1&gt;–&lt;h6&gt;</div><div class="tag-desc">Headings, biggest to smallest</div></div>
+    <div class="tag-card"><div class="tag-icon">📝</div><div class="tag-name">&lt;p&gt;</div><div class="tag-desc">Paragraph of text</div></div>
+    <div class="tag-card"><div class="tag-icon">💪</div><div class="tag-name">&lt;b&gt;</div><div class="tag-desc">Bold text</div></div>
+    <div class="tag-card"><div class="tag-icon">🌀</div><div class="tag-name">&lt;i&gt;</div><div class="tag-desc">Italic text</div></div>
+    <div class="tag-card"><div class="tag-icon">✏️</div><div class="tag-name">&lt;u&gt;</div><div class="tag-desc">Underline text</div></div>
+    <div class="tag-card"><div class="tag-icon">⏎</div><div class="tag-name">&lt;br&gt;</div><div class="tag-desc">Line break (no closing tag!)</div></div>
+  </div>
+
+  <p style="font-weight:800; margin-top:34px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>&lt;h1&gt;My Title&lt;h1&gt;</pre>
+      <div class="mf-note">The closing tag says <b class="mono">&lt;h1&gt;</b> again instead of <b class="mono">&lt;/h1&gt;</b> — no slash!</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>&lt;h1&gt;My Title&lt;/h1&gt;</pre>
+      <div class="mf-note">The slash <b class="mono">/</b> is what makes it a closing tag.</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try2" data-original="&lt;h1&gt;My Name&lt;/h1&gt;
+&lt;p&gt;I love &lt;b&gt;drawing&lt;/b&gt; and &lt;i&gt;dancing&lt;/i&gt;.&lt;/p&gt;">&lt;h1&gt;My Name&lt;/h1&gt;
+&lt;p&gt;I love &lt;b&gt;drawing&lt;/b&gt; and &lt;i&gt;dancing&lt;/i&gt;.&lt;/p&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try2','out2')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try2','out2')">↺ Reset</button>
+    </div>
+    <iframe id="out2" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 3. LISTS ===================== -->
+<section id="s3">
+  <div class="section-head">
+    <div class="section-icon">📋</div>
+    <div><h2>3. Lists</h2></div>
+  </div>
+  <p class="section-sub">Two kinds of lists: one with numbers (order matters), one with dots (order doesn't matter).</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Unordered (dots)</div>
+      <pre>&lt;<span class="kw">ul</span>&gt;
+  &lt;<span class="kw">li</span>&gt;Pune&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;Delhi&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;Bangalore&lt;/<span class="kw">li</span>&gt;
+&lt;/<span class="kw">ul</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner">
+        <ul style="margin:0;padding-left:22px;">
+          <li>Pune</li><li>Delhi</li><li>Bangalore</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Ordered (numbers)</div>
+      <pre>&lt;<span class="kw">ol</span>&gt;
+  &lt;<span class="kw">li</span>&gt;Somesh&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;Rohit&lt;/<span class="kw">li</span>&gt;
+  &lt;<span class="kw">li</span>&gt;Vishakha&lt;/<span class="kw">li</span>&gt;
+&lt;/<span class="kw">ol</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner">
+        <ol style="margin:0;padding-left:22px;">
+          <li>Somesh</li><li>Rohit</li><li>Vishakha</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-size:16px;color:#555;">💡 <b class="mono">&lt;ul&gt;</b> = Unordered List (dots) &nbsp;&nbsp;|&nbsp;&nbsp; <b class="mono">&lt;ol&gt;</b> = Ordered List (numbers) &nbsp;&nbsp;|&nbsp;&nbsp; <b class="mono">&lt;li&gt;</b> = one List Item, goes inside either one</p>
+
+  <p style="font-weight:800; margin-top:30px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>&lt;ul&gt;
+  Pune
+  Delhi
+&lt;/ul&gt;</pre>
+      <div class="mf-note">Text is loose inside <b class="mono">&lt;ul&gt;</b> — missing <b class="mono">&lt;li&gt;</b> wrapper for each item.</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>&lt;ul&gt;
+  &lt;li&gt;Pune&lt;/li&gt;
+  &lt;li&gt;Delhi&lt;/li&gt;
+&lt;/ul&gt;</pre>
+      <div class="mf-note">Every list item needs its own <b class="mono">&lt;li&gt;...&lt;/li&gt;</b>.</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try3" data-original="&lt;h3&gt;My Favorite Foods&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Pizza&lt;/li&gt;
+  &lt;li&gt;Mango&lt;/li&gt;
+&lt;/ul&gt;">&lt;h3&gt;My Favorite Foods&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;Pizza&lt;/li&gt;
+  &lt;li&gt;Mango&lt;/li&gt;
+&lt;/ul&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try3','out3')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try3','out3')">↺ Reset</button>
+    </div>
+    <iframe id="out3" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 4. LINKS & IMAGES ===================== -->
+<section id="s4">
+  <div class="section-head">
+    <div class="section-icon">🔗</div>
+    <div><h2>4. Links &amp; Images</h2></div>
+  </div>
+  <p class="section-sub">These two tags don't have plain text between them — they use an <b>attribute</b> (extra info) to say where to link or which picture to show.</p>
+
+  <div class="anatomy">
+    <div class="tagline">&lt;img <span class="attr">src</span>=<span class="val">"cat.jpg"</span>&gt;</div>
+  </div>
+  <p style="text-align:center;font-size:15px;color:#555;">🔵 attribute name &nbsp;=&nbsp; 🟢 value in quotes</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Image</div>
+      <pre>&lt;<span class="kw">img</span> <span class="attr">src</span>=<span class="val">"sun.jpg"</span> <span class="attr">width</span>=<span class="val">"120px"</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner" style="display:flex;align-items:center;justify-content:center;">
+        <div style="width:100px;height:70px;background:linear-gradient(135deg,#fbbf24,#f97316);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:28px;">☀️</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Link</div>
+      <pre>&lt;<span class="kw">a</span> <span class="attr">href</span>=<span class="val">"https://w3schools.com"</span>&gt;
+  Visit W3Schools
+&lt;/<span class="kw">a</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner">
+        <span style="color:#1a73e8;text-decoration:underline;cursor:pointer;">Visit W3Schools</span>
+        <div style="font-size:16px;color:#666;margin-top:6px;">👆 clicking this takes you to another page</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-weight:800; margin-top:30px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>&lt;img src=sun.jpg&gt;</pre>
+      <div class="mf-note">Missing quotes around the file name — the browser gets confused.</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>&lt;img src="sun.jpg"&gt;</pre>
+      <div class="mf-note">Attribute values always go inside <b class="mono">"quotes"</b>.</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try4" data-original="&lt;a href=&quot;https://w3schools.com&quot;&gt;Click me&lt;/a&gt;
+&lt;br&gt;
+&lt;img src=&quot;https://placehold.co/100x80&quot; width=&quot;100px&quot;&gt;">&lt;a href="https://w3schools.com"&gt;Click me&lt;/a&gt;
+&lt;br&gt;
+&lt;img src="https://placehold.co/100x80" width="100px"&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try4','out4')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try4','out4')">↺ Reset</button>
+    </div>
+    <iframe id="out4" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 5. CSS COLORS ===================== -->
+<section id="s5">
+  <div class="section-head">
+    <div class="section-icon">🎨</div>
+    <div><h2>5. CSS: Coloring &amp; Styling</h2></div>
+  </div>
+  <p class="section-sub">HTML builds the page. CSS makes it pretty. CSS rules live inside <b class="mono">&lt;style&gt;</b> in the head.</p>
+
+  <div class="anatomy">
+    <div class="tagline">h1 { <span class="attr">color</span>: <span class="val">pink</span>; }</div>
+  </div>
+  <p style="text-align:center;font-size:15px;color:#555;">🎯 which tag &nbsp;&nbsp;|&nbsp;&nbsp; 🔵 property &nbsp;&nbsp;|&nbsp;&nbsp; 🟢 value &nbsp;&nbsp;|&nbsp;&nbsp; always ends with ;</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>&lt;<span class="kw">style</span>&gt;
+  h1 {
+    <span class="attr">color</span>: <span class="val">orange</span>;
+  }
+  body {
+    <span class="attr">background-color</span>: <span class="val">skyblue</span>;
+  }
+&lt;/<span class="kw">style</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner" style="background:skyblue;">
+        <h1 style="color:orange;margin:0;font-size:22px;">Colorful Title</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="tag-grid">
+    <div class="tag-card"><div class="tag-icon">🖌️</div><div class="tag-name">color</div><div class="tag-desc">Text color</div></div>
+    <div class="tag-card"><div class="tag-icon">🪣</div><div class="tag-name">background-color</div><div class="tag-desc">Fill color behind</div></div>
+    <div class="tag-card"><div class="tag-icon">📏</div><div class="tag-name">width / height</div><div class="tag-desc">Size of a box</div></div>
+    <div class="tag-card"><div class="tag-icon">🖼️</div><div class="tag-name">border</div><div class="tag-desc">Outline around a box</div></div>
+    <div class="tag-card"><div class="tag-icon">🔵</div><div class="tag-name">border-radius</div><div class="tag-desc">Rounds the corners</div></div>
+    <div class="tag-card"><div class="tag-icon">🎯</div><div class="tag-name">text-align</div><div class="tag-desc">left / center / right</div></div>
+  </div>
+
+  <p style="margin-top:26px;font-weight:700;">Borders — 3 pieces working together:</p>
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>div {
+  <span class="attr">border-style</span>: <span class="val">dotted</span>;
+  <span class="attr">border-color</span>: <span class="val">green</span>;
+  <span class="attr">border-width</span>: <span class="val">5px</span>;
+}</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner" style="display:flex;justify-content:center;">
+        <div style="border:5px dotted green;border-radius:6px;padding:16px 24px;">A box!</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-weight:800; margin-top:30px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>h1 {
+  color: pink
+}</pre>
+      <div class="mf-note">Missing the semicolon <b class="mono">;</b> after <b class="mono">pink</b> — CSS rules need one at the end of each line.</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>h1 {
+  color: pink;
+}</pre>
+      <div class="mf-note">The semicolon tells CSS "this rule is done."</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try5" data-original="&lt;style&gt;
+  h1 { color: purple; }
+  body { background-color: lightyellow; }
+&lt;/style&gt;
+&lt;h1&gt;Styled Page&lt;/h1&gt;">&lt;style&gt;
+  h1 { color: purple; }
+  body { background-color: lightyellow; }
+&lt;/style&gt;
+&lt;h1&gt;Styled Page&lt;/h1&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try5','out5')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try5','out5')">↺ Reset</button>
+    </div>
+    <iframe id="out5" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 6. LAYOUT / DIVS ===================== -->
+<section id="s6">
+  <div class="section-head">
+    <div class="section-icon">📦</div>
+    <div><h2>6. Boxes &amp; Layout (div)</h2></div>
+  </div>
+  <p class="section-sub"><b class="mono">&lt;div&gt;</b> is an invisible box. You group things inside a div, then use CSS to place boxes side-by-side, like arranging furniture in a room.</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>&lt;<span class="kw">div</span> <span class="attr">id</span>=<span class="val">"left"</span>&gt;
+  &lt;h3&gt;Box 1&lt;/h3&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+&lt;<span class="kw">div</span> <span class="attr">id</span>=<span class="val">"right"</span>&gt;
+  &lt;h3&gt;Box 2&lt;/h3&gt;
+&lt;/<span class="kw">div</span>&gt;
+
+&lt;<span class="kw">style</span>&gt;
+  #left  { <span class="attr">float</span>: <span class="val">left</span>;  <span class="attr">width</span>: <span class="val">50%</span>; <span class="attr">background</span>: <span class="val">pink</span>; }
+  #right { <span class="attr">float</span>: <span class="val">right</span>; <span class="attr">width</span>: <span class="val">50%</span>; <span class="attr">background</span>: <span class="val">lightgreen</span>; }
+&lt;/<span class="kw">style</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner" style="display:flex;">
+        <div style="flex:1;background:pink;padding:14px;text-align:center;">Box 1</div>
+        <div style="flex:1;background:lightgreen;padding:14px;text-align:center;">Box 2</div>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-weight:700;margin-top:10px;">3 boxes, adding up to 100% width:</p>
+  <div class="anatomy" style="margin:16px 0;">
+    <div style="display:flex;border:3px solid var(--ink);border-radius:10px;overflow:hidden;box-shadow:6px 6px 0 var(--ink);width:100%;max-width:600px;">
+      <div style="flex:4;background:#fecaca;padding:16px;text-align:center;font-family:monospace;">40%</div>
+      <div style="flex:3;background:#bbf7d0;padding:16px;text-align:center;font-family:monospace;">30%</div>
+      <div style="flex:3;background:#bfdbfe;padding:16px;text-align:center;font-family:monospace;">30%</div>
+    </div>
+  </div>
+
+  <div class="tag-grid">
+    <div class="tag-card"><div class="tag-icon">📦</div><div class="tag-name">div</div><div class="tag-desc">An invisible container box</div></div>
+    <div class="tag-card"><div class="tag-icon">⬅️➡️</div><div class="tag-name">float</div><div class="tag-desc">Push box left or right</div></div>
+    <div class="tag-card"><div class="tag-icon">📍</div><div class="tag-name">position</div><div class="tag-desc">relative / absolute placing</div></div>
+    <div class="tag-card"><div class="tag-icon">🏷️</div><div class="tag-name">id="name"</div><div class="tag-desc">Gives a box a unique name to style with #name</div></div>
+  </div>
+
+  <p style="font-weight:800; margin-top:30px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>&lt;style&gt;
+  left { float: left; }
+&lt;/style&gt;
+&lt;div id="left"&gt;...&lt;/div&gt;</pre>
+      <div class="mf-note">CSS says <b class="mono">left</b> but should say <b class="mono">#left</b> — the <b class="mono">#</b> means "an id named...".</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>&lt;style&gt;
+  #left { float: left; }
+&lt;/style&gt;
+&lt;div id="left"&gt;...&lt;/div&gt;</pre>
+      <div class="mf-note">Match the <b class="mono">#</b> + id name exactly to the div's <b class="mono">id="..."</b>.</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try6" data-original="&lt;style&gt;
+  #a { float: left; width: 50%; background: lightblue; }
+  #b { float: right; width: 50%; background: lightpink; }
+&lt;/style&gt;
+&lt;div id=&quot;a&quot;&gt;&lt;h3&gt;Left&lt;/h3&gt;&lt;/div&gt;
+&lt;div id=&quot;b&quot;&gt;&lt;h3&gt;Right&lt;/h3&gt;&lt;/div&gt;">&lt;style&gt;
+  #a { float: left; width: 50%; background: lightblue; }
+  #b { float: right; width: 50%; background: lightpink; }
+&lt;/style&gt;
+&lt;div id="a"&gt;&lt;h3&gt;Left&lt;/h3&gt;&lt;/div&gt;
+&lt;div id="b"&gt;&lt;h3&gt;Right&lt;/h3&gt;&lt;/div&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try6','out6')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try6','out6')">↺ Reset</button>
+    </div>
+    <iframe id="out6" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 7. VIDEO / AUDIO (visual only) ===================== -->
+<section id="s7">
+  <div class="section-head">
+    <div class="section-icon">🎬</div>
+    <div><h2>7. Video &amp; Sound — Seen, Not Heard</h2></div>
+  </div>
+  <p class="section-sub">You can put video and sound on a page too. We focus on <b>video</b> because it's visual. Sound (<b class="mono">&lt;audio&gt;</b>) works the same way — but always add <b>captions</b> so everyone can understand it.</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>&lt;<span class="kw">video</span> <span class="attr">controls</span>
+       <span class="attr">width</span>=<span class="val">"400px"</span>&gt;
+  &lt;<span class="kw">source</span> <span class="attr">src</span>=<span class="val">"clip.mp4"</span>
+          <span class="attr">type</span>=<span class="val">"video/mp4"</span>&gt;
+&lt;/<span class="kw">video</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner" style="display:flex;justify-content:center;">
+        <div style="width:220px;background:#111;border-radius:10px;padding:10px;text-align:center;color:#fff;">
+          <div style="font-size:34px;">🎞️</div>
+          <div style="height:6px;background:#444;border-radius:3px;margin:10px 0;overflow:hidden;">
+            <div style="width:40%;height:100%;background:var(--result);"></div>
+          </div>
+          <div style="display:flex;justify-content:center;gap:14px;font-size:16px;">▶️ 🔊 ⛶</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-weight:700;">🔊 What about sound-only (<span class="mono">&lt;audio&gt;</span>)?</p>
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>&lt;<span class="kw">audio</span> <span class="attr">controls</span>&gt;
+  &lt;<span class="kw">source</span> <span class="attr">src</span>=<span class="val">"song.mp3"</span>
+          <span class="attr">type</span>=<span class="val">"audio/mp3"</span>&gt;
+&lt;/<span class="kw">audio</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 What shows on screen</div>
+      <div class="result-inner" style="display:flex;align-items:center;gap:16px;">
+        <div class="wave">
+          <span style="animation-delay:0s"></span><span style="animation-delay:.1s"></span>
+          <span style="animation-delay:.2s"></span><span style="animation-delay:.3s"></span>
+          <span style="animation-delay:.4s"></span>
+        </div>
+        <div style="font-size:15px;color:#555;">A player bar appears — <b>no picture</b>, just a play button. That's why sound content needs captions/text nearby to describe it! 💬</div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="checklist">
+    <li><b class="mono">controls</b> — shows play/pause buttons on screen</li>
+    <li><b class="mono">width</b> / <b class="mono">height</b> — the size of the video box</li>
+    <li><b class="mono">&lt;source&gt;</b> — tells the browser where the file is</li>
+    <li>Always pair audio with visible text or captions 👀</li>
+  </ul>
+</section>
+
+<!-- ===================== 8. FORMS ===================== -->
+<section id="s8">
+  <div class="section-head">
+    <div class="section-icon">📝</div>
+    <div><h2>8. Forms — Collecting Answers</h2></div>
+  </div>
+  <p class="section-sub">Forms let people type answers and press Submit. Every input has a <b class="mono">&lt;label&gt;</b> — the visible question text — next to it.</p>
+
+  <div class="pair">
+    <div class="panel code">
+      <div class="bar">🟠 Code</div>
+      <pre>&lt;<span class="kw">form</span>&gt;
+  &lt;<span class="kw">label</span>&gt;Name:&lt;/<span class="kw">label</span>&gt;
+  &lt;<span class="kw">input</span> <span class="attr">type</span>=<span class="val">"text"</span>&gt;&lt;<span class="kw">br</span>&gt;
+
+  &lt;<span class="kw">label</span>&gt;Email:&lt;/<span class="kw">label</span>&gt;
+  &lt;<span class="kw">input</span> <span class="attr">type</span>=<span class="val">"email"</span>&gt;&lt;<span class="kw">br</span>&gt;
+
+  &lt;<span class="kw">button</span>&gt;Submit&lt;/<span class="kw">button</span>&gt;
+&lt;/<span class="kw">form</span>&gt;</pre>
+    </div>
+    <div class="arrow-col">➜</div>
+    <div class="panel result">
+      <div class="bar">🔵 Result</div>
+      <div class="result-inner">
+        <div style="display:flex;flex-direction:column;gap:10px;max-width:220px;">
+          <label style="font-size:15px;font-weight:700;">Name:
+            <input type="text" style="display:block;width:100%;margin-top:3px;padding:6px;border:1px solid #ccc;border-radius:6px;">
+          </label>
+          <label style="font-size:15px;font-weight:700;">Email:
+            <input type="email" style="display:block;width:100%;margin-top:3px;padding:6px;border:1px solid #ccc;border-radius:6px;">
+          </label>
+          <button style="background:var(--ink);color:#fff;border:none;padding:8px;border-radius:6px;font-weight:700;">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tag-grid">
+    <div class="tag-card"><div class="tag-icon">🏷️</div><div class="tag-name">label</div><div class="tag-desc">The question text</div></div>
+    <div class="tag-card"><div class="tag-icon">⌨️</div><div class="tag-name">input type="text"</div><div class="tag-desc">A typed answer box</div></div>
+    <div class="tag-card"><div class="tag-icon">📧</div><div class="tag-name">input type="email"</div><div class="tag-desc">Checks for a valid email</div></div>
+    <div class="tag-card"><div class="tag-icon">📅</div><div class="tag-name">input type="date"</div><div class="tag-desc">A date picker</div></div>
+    <div class="tag-card"><div class="tag-icon">🔢</div><div class="tag-name">input type="number"</div><div class="tag-desc">Only numbers</div></div>
+    <div class="tag-card"><div class="tag-icon">✅</div><div class="tag-name">required</div><div class="tag-desc">Must be filled before submit</div></div>
+  </div>
+
+  <p style="font-weight:800; margin-top:30px;">🔍 Spot the difference</p>
+  <div class="mistake-fix">
+    <div class="mf-box bad">
+      <div class="mf-bar">❌ Broken</div>
+      <pre>&lt;form&gt;
+  &lt;label&gt;Name:&lt;/label&gt;
+  &lt;input type=text&gt;
+&lt;/form&gt;</pre>
+      <div class="mf-note">Missing the closing <b class="mono">&lt;/form&gt;</b>... wait it's there. Real bug: <b class="mono">type=text</b> has no quotes.</div>
+    </div>
+    <div class="mf-box good">
+      <div class="mf-bar">✅ Fixed</div>
+      <pre>&lt;form&gt;
+  &lt;label&gt;Name:&lt;/label&gt;
+  &lt;input type="text"&gt;
+&lt;/form&gt;</pre>
+      <div class="mf-note">Same rule as always: attribute values need <b class="mono">"quotes"</b>.</div>
+    </div>
+  </div>
+
+  <div class="tryit">
+    <div class="bar"><span>🟣 Try it yourself</span></div>
+    <textarea id="try7" data-original="&lt;form&gt;
+  &lt;label&gt;Your Name:&lt;/label&gt;
+  &lt;input type=&quot;text&quot;&gt;&lt;br&gt;&lt;br&gt;
+  &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;">&lt;form&gt;
+  &lt;label&gt;Your Name:&lt;/label&gt;
+  &lt;input type="text"&gt;&lt;br&gt;&lt;br&gt;
+  &lt;button&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</textarea>
+    <div class="btnrow">
+      <button onclick="runTry('try7','out7')">▶ Show Result</button>
+      <button class="reset" onclick="resetTry('try7','out7')">↺ Reset</button>
+    </div>
+    <iframe id="out7" title="result preview"></iframe>
+  </div>
+</section>
+
+<!-- ===================== 9. BUILD-ALONGS + PROJECTS ===================== -->
+<section id="s9">
+  <div class="section-head">
+    <div class="section-icon">🏗️</div>
+    <div><h2>9. Build-Alongs — Finish the Page</h2></div>
+  </div>
+  <p class="section-sub">The target result is shown. Some code is already written — fill in the missing piece(s) to match it, then check your result below.</p>
+
+  <div class="build-along">
+    <div class="ba-head">🔲 Build-Along 1 — Three Boxes Side by Side</div>
+    <div class="ba-body">
+      <div class="ba-target">
+        <div class="lbl">🎯 Target result</div>
+        <div style="display:flex;border:2px solid var(--ink);border-radius:8px;overflow:hidden;">
+          <div style="flex:4;background:#fecaca;padding:14px;text-align:center;">Box 1</div>
+          <div style="flex:3;background:#bbf7d0;padding:14px;text-align:center;">Box 2</div>
+          <div style="flex:3;background:#bfdbfe;padding:14px;text-align:center;">Box 3</div>
+        </div>
+      </div>
+      <p style="font-size:15px;color:#555;">✏️ Fill in the missing <b class="mono">width</b> for <b class="mono">#three</b> so all 3 boxes add up to 100% (40% + 30% + <b>?</b>).</p>
+      <textarea id="ba1" data-original="&lt;style&gt;
+  #one   { float: left; width: 40%; background: #fecaca; }
+  #two   { float: left; width: 30%; background: #bbf7d0; }
+  #three { float: left; width: ____; background: #bfdbfe; }
+&lt;/style&gt;
+&lt;div id=&quot;one&quot;&gt;Box 1&lt;/div&gt;
+&lt;div id=&quot;two&quot;&gt;Box 2&lt;/div&gt;
+&lt;div id=&quot;three&quot;&gt;Box 3&lt;/div&gt;">&lt;style&gt;
+  #one   { float: left; width: 40%; background: #fecaca; }
+  #two   { float: left; width: 30%; background: #bbf7d0; }
+  #three { float: left; width: ____; background: #bfdbfe; }
+&lt;/style&gt;
+&lt;div id="one"&gt;Box 1&lt;/div&gt;
+&lt;div id="two"&gt;Box 2&lt;/div&gt;
+&lt;div id="three"&gt;Box 3&lt;/div&gt;</textarea>
+      <div class="btnrow">
+        <button onclick="runTry('ba1','baout1')">▶ Check My Result</button>
+        <button class="reset" onclick="resetTry('ba1','baout1')">↺ Reset</button>
+      </div>
+      <div class="hint">💡 Hint: 40% + 30% + ___% = 100%</div>
+      <iframe id="baout1" title="build-along result"></iframe>
+    </div>
+  </div>
+
+  <div class="build-along">
+    <div class="ba-head">🙏 Build-Along 2 — Ganesh Utsav Poster</div>
+    <div class="ba-body">
+      <div class="ba-target">
+        <div class="lbl">🎯 Target result</div>
+        <div style="text-align:center;font-family:Arial;">
+          <h3 style="color:#a16207;margin:.2em 0;">GANESH UTSAV 2024</h3>
+          <p style="margin:.2em 0;font-size:15px;">Lal baug Raja</p>
+        </div>
+      </div>
+      <p style="font-size:15px;color:#555;">✏️ Fill in the missing heading tag and its matching closing tag.</p>
+      <textarea id="ba2" data-original="____&gt;GANESH UTSAV 2024&lt;/____&gt;
+&lt;h3&gt;Lal baug Raja&lt;/h3&gt;">____&gt;GANESH UTSAV 2024&lt;/____&gt;
+&lt;h3&gt;Lal baug Raja&lt;/h3&gt;</textarea>
+      <div class="btnrow">
+        <button onclick="runTry('ba2','baout2')">▶ Check My Result</button>
+        <button class="reset" onclick="resetTry('ba2','baout2')">↺ Reset</button>
+      </div>
+      <div class="hint">💡 Hint: it's bigger than an h3, so it should be an h1 or h2.</div>
+      <iframe id="baout2" title="build-along result"></iframe>
+    </div>
+  </div>
+
+  <div class="build-along">
+    <div class="ba-head">🏢 Build-Along 3 — Foundation Header Box</div>
+    <div class="ba-body">
+      <div class="ba-target">
+        <div class="lbl">🎯 Target result</div>
+        <div style="width:100%;height:40px;background:skyblue;color:blue;border:3px solid blue;border-radius:8px;text-align:center;line-height:40px;font-weight:bold;font-family:Arial;">SUJAYA FOUNDATION</div>
+      </div>
+      <p style="font-size:15px;color:#555;">✏️ Fill in the missing CSS property to round the corners.</p>
+      <textarea id="ba3" data-original="&lt;style&gt;
+  #header {
+    background-color: skyblue;
+    color: blue;
+    border: 3px solid blue;
+    ____: 8px;
+    text-align: center;
+  }
+&lt;/style&gt;
+&lt;div id=&quot;header&quot;&gt;SUJAYA FOUNDATION&lt;/div&gt;">&lt;style&gt;
+  #header {
+    background-color: skyblue;
+    color: blue;
+    border: 3px solid blue;
+    ____: 8px;
+    text-align: center;
+  }
+&lt;/style&gt;
+&lt;div id="header"&gt;SUJAYA FOUNDATION&lt;/div&gt;</textarea>
+      <div class="btnrow">
+        <button onclick="runTry('ba3','baout3')">▶ Check My Result</button>
+        <button class="reset" onclick="resetTry('ba3','baout3')">↺ Reset</button>
+      </div>
+      <div class="hint">💡 Hint: the property that rounds corners has "radius" in its name.</div>
+      <iframe id="baout3" title="build-along result"></iframe>
+    </div>
+  </div>
+
+  <h3 style="margin-top:50px;">📚 Full Reference Projects</h3>
+  <p class="section-sub">These are complete, working pages built from everything above.</p>
+
+  <div class="project-card">
+    <div class="phead">🙏 Project: Festival Page</div>
+    <div class="pbody">
+      <p style="color:#555;font-size:16px;">Uses: headings, paragraph, image, list, link, form ✅</p>
+      <iframe id="proj1" title="festival page result"></iframe>
+      <details class="code-toggle">
+        <summary>👀 See the code</summary>
+        <pre id="proj1code"></pre>
+      </details>
+    </div>
+  </div>
+
+  <div class="project-card">
+    <div class="phead">🏢 Project: Foundation Sign-Up Form</div>
+    <div class="pbody">
+      <p style="color:#555;font-size:16px;">Uses: div layout, borders, rounded corners, styled form ✅</p>
+      <iframe id="proj2" title="foundation form result"></iframe>
+      <details class="code-toggle">
+        <summary>👀 See the code</summary>
+        <pre id="proj2code"></pre>
+      </details>
+    </div>
+  </div>
+
+</section>
+
+<!-- ===================== 10. GLOSSARY ===================== -->
+<section id="s10">
+  <div class="section-head">
+    <div class="section-icon">📖</div>
+    <div><h2>10. Glossary — Every Tag in One Place</h2></div>
+  </div>
+  <p class="section-sub">A cheat sheet. Keep this open in another tab while you build your own page.</p>
+
+  <div class="glossary-strip">
+    <div class="g-item"><div class="g-tag">&lt;html&gt;</div><div class="g-def">Wraps the whole page</div></div>
+    <div class="g-item"><div class="g-tag">&lt;head&gt;</div><div class="g-def">Hidden page info</div></div>
+    <div class="g-item"><div class="g-tag">&lt;title&gt;</div><div class="g-def">Text on the browser tab</div></div>
+    <div class="g-item"><div class="g-tag">&lt;body&gt;</div><div class="g-def">Everything visible on the page</div></div>
+    <div class="g-item"><div class="g-tag">&lt;h1&gt;–&lt;h6&gt;</div><div class="g-def">Headings, big to small</div></div>
+    <div class="g-item"><div class="g-tag">&lt;p&gt;</div><div class="g-def">A paragraph of text</div></div>
+    <div class="g-item"><div class="g-tag">&lt;b&gt;</div><div class="g-def">Bold text</div></div>
+    <div class="g-item"><div class="g-tag">&lt;i&gt;</div><div class="g-def">Italic text</div></div>
+    <div class="g-item"><div class="g-tag">&lt;u&gt;</div><div class="g-def">Underlined text</div></div>
+    <div class="g-item"><div class="g-tag">&lt;br&gt;</div><div class="g-def">A line break, no closing tag</div></div>
+    <div class="g-item"><div class="g-tag">&lt;ul&gt;</div><div class="g-def">Unordered list (dots)</div></div>
+    <div class="g-item"><div class="g-tag">&lt;ol&gt;</div><div class="g-def">Ordered list (numbers)</div></div>
+    <div class="g-item"><div class="g-tag">&lt;li&gt;</div><div class="g-def">One list item</div></div>
+    <div class="g-item"><div class="g-tag">&lt;a href=""&gt;</div><div class="g-def">A clickable link</div></div>
+    <div class="g-item"><div class="g-tag">&lt;img src=""&gt;</div><div class="g-def">Shows a picture</div></div>
+    <div class="g-item"><div class="g-tag">&lt;div&gt;</div><div class="g-def">An invisible container box</div></div>
+    <div class="g-item"><div class="g-tag">&lt;video&gt;</div><div class="g-def">Shows a video player</div></div>
+    <div class="g-item"><div class="g-tag">&lt;audio&gt;</div><div class="g-def">Shows a sound player</div></div>
+    <div class="g-item"><div class="g-tag">&lt;source src=""&gt;</div><div class="g-def">The file for video/audio</div></div>
+    <div class="g-item"><div class="g-tag">&lt;form&gt;</div><div class="g-def">A group of question boxes</div></div>
+    <div class="g-item"><div class="g-tag">&lt;label&gt;</div><div class="g-def">The visible question text</div></div>
+    <div class="g-item"><div class="g-tag">&lt;input&gt;</div><div class="g-def">A box to type an answer</div></div>
+    <div class="g-item"><div class="g-tag">&lt;button&gt;</div><div class="g-def">A clickable button</div></div>
+    <div class="g-item"><div class="g-tag">style</div><div class="g-def">CSS rules live here</div></div>
+    <div class="g-item"><div class="g-tag">color</div><div class="g-def">Text color</div></div>
+    <div class="g-item"><div class="g-tag">background-color</div><div class="g-def">Fill color behind</div></div>
+    <div class="g-item"><div class="g-tag">width / height</div><div class="g-def">Size of a box</div></div>
+    <div class="g-item"><div class="g-tag">border</div><div class="g-def">Outline around a box</div></div>
+    <div class="g-item"><div class="g-tag">border-radius</div><div class="g-def">Rounds the corners</div></div>
+    <div class="g-item"><div class="g-tag">text-align</div><div class="g-def">left / center / right</div></div>
+    <div class="g-item"><div class="g-tag">float</div><div class="g-def">Push a box left or right</div></div>
+    <div class="g-item"><div class="g-tag">position</div><div class="g-def">relative / absolute placing</div></div>
+    <div class="g-item"><div class="g-tag">id="name"</div><div class="g-def">A unique name, styled with #name</div></div>
+    <div class="g-item"><div class="g-tag">controls</div><div class="g-def">Shows play/pause buttons</div></div>
+    <div class="g-item"><div class="g-tag">required</div><div class="g-def">Must be filled before submit</div></div>
+  </div>
+</section>
+
+<footer>
+  Made with 💛 for visual learners &nbsp;•&nbsp; Every lesson = code on the left, result on the right
+</footer>
+
+<script>
+function runTry(taId, outId){
+  const ta = document.getElementById(taId);
+  const code = ta.value.replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
+  writeIntoIframe(outId, code);
+  markDone(taId);
+}
+function writeIntoIframe(outId, code){
+  const iframe = document.getElementById(outId);
+  // Try srcdoc first
+  try{
+    iframe.srcdoc = code;
+  }catch(e){}
+  // Fallback for browsers/contexts (notably Safari on file:// pages) where
+  // srcdoc silently fails to render: write directly into the iframe document.
+  setTimeout(() => {
+    try{
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      if(doc && (!doc.body || doc.body.innerHTML.trim() === '')){
+        doc.open();
+        doc.write(code);
+        doc.close();
+      }
+    }catch(e){
+      // last resort: direct write without checking, in case contentDocument was blocked before
+      try{
+        const doc2 = iframe.contentWindow.document;
+        doc2.open();
+        doc2.write(code);
+        doc2.close();
+      }catch(e2){}
+    }
+  }, 60);
+}
+function resetTry(taId, outId){
+  const ta = document.getElementById(taId);
+  const original = ta.getAttribute('data-original')
+    .replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
+  ta.value = original;
+  runTry(taId, outId);
+}
+
+// ===== progress tracking =====
+const sectionIds = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10'];
+const doneSections = new Set();
+
+function markDone(taId){
+  // figure out which section this textarea belongs to and mark it done
+  const el = document.getElementById(taId);
+  const sec = el.closest('section');
+  if(sec){ doneSections.add(sec.id); updateProgress(); }
+}
+
+function updateProgress(){
+  sectionIds.forEach(id=>{
+    const navLink = document.querySelector('.trail a[data-sec="'+id+'"]');
+    if(navLink && doneSections.has(id)){ navLink.classList.add('done'); }
+  });
+  const pct = (doneSections.size / sectionIds.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// mark a section done just by scrolling past it (visual "read" progress too)
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting && entry.intersectionRatio > 0.6){
+      doneSections.add(entry.target.id);
+      updateProgress();
+    }
+  });
+}, { threshold: [0.6] });
+sectionIds.forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) observer.observe(el);
+});
+
+// auto-run all try-its and build-alongs once on load so the page isn't empty
+window.addEventListener('DOMContentLoaded', () => {
+  for(let i=1;i<=7;i++){ runTry('try'+i,'out'+i); }
+  for(let i=1;i<=3;i++){ runTry('ba'+i,'baout'+i); }
+  doneSections.clear(); // don't count auto-run as "done", only real scroll/interaction
+  updateProgress();
+
+  const proj1 = `<html><head><style>
+    body{font-family:Arial;text-align:center;background:#fff8f0;}
+    h2{color:green;} h3{color:orange;}
+  <\/style></head><body>
+  <h1>Festivals of India</h1>
+  <h2>Explore the Rich Culture</h2>
+  <h3>Diwali: The Festival of Lights</h3>
+  <p>Diwali is celebrated by lighting lamps, decorating homes with rangoli, and enjoying sweets.</p>
+  <ul style="display:inline-block;text-align:left;">
+    <li>Diyas (lamps)</li><li>Rangoli (floor art)</li><li>Sweets</li>
+  </ul>
+  <p><a href="#">Learn More About Diwali</a></p>
+  <form>
+    <h4>Share Your Favorite Festival</h4>
+    <input type="email" placeholder="Enter email" required><br><br>
+    <input type="text" placeholder="Favorite festival" required><br><br>
+    <button>Submit</button>
+  </form>
+  </body></html>`;
+  writeIntoIframe('proj1', proj1);
+  document.getElementById('proj1code').textContent = proj1;
+
+  const proj2 = `<html><head><style>
+    body{font-family:Arial;background:#eef;}
+    #header{width:100%;height:60px;background:skyblue;color:blue;
+      border:5px solid blue;border-radius:10px;text-align:center;line-height:60px;font-weight:bold;}
+    form{border:5px dashed black;border-radius:100px;padding:20px;margin-top:14px;background:#fff;}
+    label{display:block;margin-top:10px;font-weight:bold;}
+    input{width:90%;padding:6px;margin-top:4px;}
+  <\/style></head><body>
+  <div id="header">SUJAYA FOUNDATION</div>
+  <form>
+    <h2 style="color:orange;">Personal Information</h2>
+    <label>Full Name:</label><input type="text">
+    <label>Email Address:</label><input type="email">
+    <label>Phone Number:</label><input type="tel">
+    <br><br><button>Submit</button>
+  </form>
+  </body></html>`;
+  writeIntoIframe('proj2', proj2);
+  document.getElementById('proj2code').textContent = proj2;
+});
+</script>
+</body>
+</html>
