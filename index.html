@@ -1338,7 +1338,7 @@ function showPreview(outId, code){
   const iframe = document.createElement('iframe');
   iframe.title = 'Result preview';
   iframe.loading = 'lazy';
-  iframe.sandbox = 'allow-forms';
+  iframe.sandbox = 'allow-forms allow-popups allow-popups-to-escape-sandbox';
   iframe.srcdoc = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:8px;font-family:Arial,sans-serif;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}</style></head><body>${code}</body></html>`;
   slot.replaceChildren(iframe);
 }
