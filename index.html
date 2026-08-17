@@ -454,6 +454,22 @@
   }
   .diy-lab button.reset{ background:#fff; color:var(--ink); border:2px solid var(--ink); }
   .diy-lab .preview-slot:empty::before{ content:"Tap Run My Code to see your page."; }
+  .has-code-errors{ border-color:var(--bad) !important; box-shadow:0 0 0 3px rgba(220,38,38,.14); }
+  .code-checks{
+    margin-top:10px; padding:12px 14px; border:2px solid var(--line); border-radius:10px;
+    background:#fff; font-size:15px;
+  }
+  .code-checks.clean{ border-color:var(--ok); color:#166534; }
+  .code-checks.has-errors{ border-color:var(--bad); background:#fff7f7; }
+  .code-checks .check-title{ display:block; font-weight:800; margin-bottom:6px; }
+  .code-checks ul{ margin:0; padding-left:20px; }
+  .code-checks li{ margin:7px 0; }
+  .code-checks .error-line{
+    display:block; margin-top:5px; padding:5px 7px; border-left:4px solid var(--bad);
+    border-radius:4px; background:#fee2e2; color:#7f1d1d; font-family:Consolas,"SF Mono",monospace;
+    white-space:pre-wrap; overflow-wrap:anywhere;
+  }
+  .code-checks .code-hint{ color:#7c4a03; }
 
   /* ===== GLOSSARY ===== */
   .glossary-strip{
@@ -1464,6 +1480,8 @@
 function runTry(taId, outId){
   const ta = document.getElementById(taId);
   const code = ta.value.replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
+  ta._runtimeIssues = [];
+  renderCodeChecks(ta);
   showPreview(outId, code);
   markDone(taId);
 }
@@ -1472,8 +1490,9 @@ function showPreview(outId, code){
   const iframe = document.createElement('iframe');
   iframe.title = 'Result preview';
   iframe.loading = 'lazy';
-  iframe.sandbox = 'allow-forms allow-popups allow-popups-to-escape-sandbox';
-  iframe.srcdoc = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:8px;font-family:Arial,sans-serif;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}</style></head><body>${code}</body></html>`;
+  iframe.sandbox = 'allow-scripts allow-forms allow-modals allow-popups';
+  const reporter = `<script>window.addEventListener('error',function(event){parent.postMessage({type:'preview-runtime-error',outputId:${JSON.stringify(outId)},message:event.message||'JavaScript error'},'*')});window.addEventListener('unhandledrejection',function(event){parent.postMessage({type:'preview-runtime-error',outputId:${JSON.stringify(outId)},message:String(event.reason||'JavaScript promise error')},'*')});<\/script>`;
+  iframe.srcdoc = `<!doctype html><html><head><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{margin:8px;font-family:Arial,sans-serif;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}</style>${reporter}</head><body>${code}</body></html>`;
   slot.replaceChildren(iframe);
 }
 function clearPreview(outId){
@@ -1484,8 +1503,365 @@ function resetTry(taId, outId){
   const original = ta.getAttribute('data-original')
     .replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
   ta.value = original;
+  ta._runtimeIssues = [];
+  renderCodeChecks(ta);
   clearPreview(outId);
 }
+
+// ===== FRIENDLY CODE CHECKS =====
+// These checks point out common beginner mistakes, but never stop a learner
+// from running their code in the isolated preview.
+const voidTags = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+const headAllowedTags = new Set(['title','base','link','meta','style','script','noscript','template']);
+
+function getLineNumber(code, index){
+  return code.slice(0, index).split(/\r?\n/).length;
+}
+
+function makeIssue(code, index, message, kind = 'error'){
+  const line = getLineNumber(code, Math.max(0, index));
+  return { line, message, kind, lineText: code.split(/\r?\n/)[line - 1] || '' };
+}
+
+function maskKeepLines(text){
+  return text.replace(/[^\r\n]/g, ' ');
+}
+
+function extractTagBlocks(code, tagName){
+  const blocks = [];
+  const openTag = new RegExp(`<${tagName}\\b[^>]*>`, 'gi');
+  const closeTag = `</${tagName}>`;
+  const lower = code.toLowerCase();
+  let match;
+
+  while((match = openTag.exec(code))){
+    const openIndex = match.index;
+    const openEnd = openIndex + match[0].length;
+    const closeIndex = lower.indexOf(closeTag, openEnd);
+    const closeEnd = closeIndex >= 0 ? closeIndex + closeTag.length : code.length;
+    const innerEnd = closeIndex >= 0 ? closeIndex : code.length;
+
+    blocks.push({
+      start: openIndex,
+      end: closeEnd,
+      innerStart: openEnd,
+      innerEnd,
+      content: code.slice(openEnd, innerEnd)
+    });
+
+    if(closeIndex < 0){
+      openTag.lastIndex = code.length;
+    }else{
+      openTag.lastIndex = closeEnd;
+    }
+  }
+
+  return blocks;
+}
+
+function prepareValidationContext(code){
+  const styleBlocks = extractTagBlocks(code, 'style');
+  const scriptBlocks = extractTagBlocks(code, 'script');
+  let maskedCode = code;
+
+  styleBlocks.forEach(block => {
+    maskedCode = `${maskedCode.slice(0, block.innerStart)}${maskKeepLines(maskedCode.slice(block.innerStart, block.innerEnd))}${maskedCode.slice(block.innerEnd)}`;
+  });
+  scriptBlocks.forEach(block => {
+    maskedCode = `${maskedCode.slice(0, block.innerStart)}${maskKeepLines(maskedCode.slice(block.innerStart, block.innerEnd))}${maskedCode.slice(block.innerEnd)}`;
+  });
+
+  maskedCode = maskedCode.replace(/<!--[\s\S]*?-->/g, comment => maskKeepLines(comment));
+  return { maskedCode, styleBlocks, scriptBlocks };
+}
+
+function collectHtmlTags(maskedCode){
+  const tags = [];
+  const tagPattern = /<\s*(\/?)\s*([a-zA-Z][\w:-]*)\b[^>]*>/g;
+  let tagMatch;
+
+  while((tagMatch = tagPattern.exec(maskedCode))){
+    const name = tagMatch[2].toLowerCase();
+    const raw = tagMatch[0];
+    tags.push({
+      name,
+      closing: tagMatch[1] === '/',
+      index: tagMatch.index,
+      endIndex: tagMatch.index + raw.length,
+      raw,
+      selfClosing: voidTags.has(name) || /\/\s*>$/.test(raw)
+    });
+  }
+
+  return tags;
+}
+
+function findFirstNonWhitespace(maskedCode, start, end){
+  const segment = maskedCode.slice(start, end);
+  const relative = segment.search(/\S/);
+  return relative >= 0 ? start + relative : -1;
+}
+
+function firstTag(name, tags, closing = false){
+  return tags.find(tag => tag.name === name && tag.closing === closing);
+}
+
+function countOpenTags(name, tags){
+  return tags.filter(tag => tag.name === name && !tag.closing).length;
+}
+
+function validateLearnerCode(code, isBuildAlong = false){
+  const issues = [];
+  const stack = [];
+  const { maskedCode, styleBlocks, scriptBlocks } = prepareValidationContext(code);
+  const tags = collectHtmlTags(maskedCode);
+
+  tags.forEach(tag => {
+    if(tag.selfClosing) return;
+
+    if(!tag.closing){
+      stack.push({ name: tag.name, index: tag.index });
+      return;
+    }
+
+    const last = stack[stack.length - 1];
+    if(last && last.name === tag.name){
+      stack.pop();
+      return;
+    }
+
+    let matchingIndex = -1;
+    for(let i = stack.length - 1; i >= 0; i--){
+      if(stack[i].name === tag.name){ matchingIndex = i; break; }
+    }
+
+    if(matchingIndex >= 0){
+      issues.push(makeIssue(code, tag.index, `This closes </${tag.name}>, but <${stack[stack.length - 1].name}> is still open. Close </${stack[stack.length - 1].name}> first.`));
+      stack.splice(matchingIndex);
+    }else{
+      issues.push(makeIssue(code, tag.index, `I cannot find an opening <${tag.name}> for this closing tag.`));
+    }
+  });
+
+  stack.slice(-3).forEach(openTag => {
+    issues.push(makeIssue(code, openTag.index, `This <${openTag.name}> tag still needs a closing </${openTag.name}> tag.`));
+  });
+
+  const hasHtmlTag = tags.some(tag => tag.name === 'html');
+  const hasHeadTag = tags.some(tag => tag.name === 'head');
+  const hasBodyTag = tags.some(tag => tag.name === 'body');
+  const looksLikeFullDocument = hasHtmlTag || (hasHeadTag && hasBodyTag);
+
+  if(looksLikeFullDocument){
+    if(countOpenTags('html', tags) > 1){
+      const duplicate = tags.find((tag, index) => tag.name === 'html' && !tag.closing && index > tags.findIndex(first => first.name === 'html' && !first.closing));
+      if(duplicate) issues.push(makeIssue(code, duplicate.index, 'Use only one <html> element in a complete page.'));
+    }
+    if(countOpenTags('head', tags) > 1){
+      const firstIndex = tags.findIndex(tag => tag.name === 'head' && !tag.closing);
+      const duplicate = tags.find((tag, index) => tag.name === 'head' && !tag.closing && index > firstIndex);
+      if(duplicate) issues.push(makeIssue(code, duplicate.index, 'Use only one <head> element in a complete page.'));
+    }
+    if(countOpenTags('body', tags) > 1){
+      const firstIndex = tags.findIndex(tag => tag.name === 'body' && !tag.closing);
+      const duplicate = tags.find((tag, index) => tag.name === 'body' && !tag.closing && index > firstIndex);
+      if(duplicate) issues.push(makeIssue(code, duplicate.index, 'Use only one <body> element in a complete page.'));
+    }
+
+    const htmlOpen = firstTag('html', tags, false);
+    const htmlClose = firstTag('html', tags, true);
+    const headOpen = firstTag('head', tags, false);
+    const headClose = firstTag('head', tags, true);
+    const bodyOpen = firstTag('body', tags, false);
+
+    if(bodyOpen && headOpen && bodyOpen.index < headOpen.index){
+      issues.push(makeIssue(code, bodyOpen.index, 'In a complete page, put <head> before <body>.'));
+    }
+
+    if(htmlOpen && htmlClose){
+      const beforeHtml = findFirstNonWhitespace(maskedCode, 0, htmlOpen.index);
+      if(beforeHtml >= 0){
+        issues.push(makeIssue(code, beforeHtml, 'Move this content inside <html>. Everything in a complete page should be inside <html>.'));
+      }
+      const afterHtml = findFirstNonWhitespace(maskedCode, htmlClose.endIndex, maskedCode.length);
+      if(afterHtml >= 0){
+        issues.push(makeIssue(code, afterHtml, 'Move this content inside <html>. Everything in a complete page should be inside <html>.'));
+      }
+    }
+
+    if(headClose && bodyOpen){
+      const betweenHeadAndBody = findFirstNonWhitespace(maskedCode, headClose.endIndex, bodyOpen.index);
+      if(betweenHeadAndBody >= 0){
+        issues.push(makeIssue(code, betweenHeadAndBody, 'Move this text inside <body>. Visible page content belongs inside <body>.'));
+      }
+    }
+
+    if(headOpen && headClose){
+      const headInnerTags = tags
+        .filter(tag => tag.index > headOpen.endIndex && tag.index < headClose.index)
+        .sort((a, b) => a.index - b.index);
+      let cursor = headOpen.endIndex;
+      let headDepth = 0;
+      let headTextIssueFound = false;
+
+      headInnerTags.forEach(tag => {
+        if(headTextIssueFound) return;
+        const between = maskedCode.slice(cursor, tag.index);
+        if(headDepth === 0 && /\S/.test(between)){
+          const rel = between.search(/\S/);
+          issues.push(makeIssue(code, cursor + rel, 'Move this text out of <head>. Put visible content inside <body>.'));
+          headTextIssueFound = true;
+        }
+
+        if(!tag.selfClosing){
+          if(tag.closing){
+            headDepth = Math.max(0, headDepth - 1);
+          }else{
+            headDepth++;
+          }
+        }
+        cursor = tag.endIndex;
+      });
+
+      if(!headTextIssueFound){
+        const tail = maskedCode.slice(cursor, headClose.index);
+        if(headDepth === 0 && /\S/.test(tail)){
+          const rel = tail.search(/\S/);
+          issues.push(makeIssue(code, cursor + rel, 'Move this text out of <head>. Put visible content inside <body>.'));
+        }
+      }
+
+      tags.forEach(tag => {
+        if(tag.index <= headOpen.endIndex || tag.index >= headClose.index) return;
+        if(tag.closing || tag.selfClosing) return;
+        if(headAllowedTags.has(tag.name)) return;
+        issues.push(makeIssue(code, tag.index, `This <${tag.name}> tag should be in <body>, not inside <head>.`));
+      });
+    }
+
+    if(htmlOpen && htmlClose){
+      [headOpen, headClose, bodyOpen, firstTag('body', tags, true)].forEach(tag => {
+        if(!tag) return;
+        if(tag.index < htmlOpen.index || tag.index > htmlClose.index){
+          issues.push(makeIssue(code, tag.index, `Move <${tag.closing ? '/' : ''}${tag.name}> inside <html>.`));
+        }
+      });
+    }
+  }
+
+  const attributePattern = /\b(?:id|class|for|type|src|href|alt|width|height|title|placeholder|value|name|target)\s*=\s*(?!["'])[^\s>]+/gi;
+  let attributeMatch;
+  while((attributeMatch = attributePattern.exec(maskedCode))){
+    const attrName = attributeMatch[0].split('=')[0].trim();
+    issues.push(makeIssue(code, attributeMatch.index, `Tip: Put quotes around the value in ${attrName}="...".`, 'hint'));
+  }
+
+  const blankIndex = code.indexOf('____');
+  if(blankIndex >= 0){
+    issues.push(makeIssue(code, blankIndex, isBuildAlong ? 'This is a build-along blank. Replace the underscores when you are ready.' : 'Replace these underscores with your code.', isBuildAlong ? 'hint' : 'error'));
+  }
+
+  styleBlocks.forEach(block => {
+    let braceDepth = 0;
+    for(let i = 0; i < block.content.length; i++){
+      if(block.content[i] === '{') braceDepth++;
+      if(block.content[i] === '}'){
+        braceDepth--;
+        if(braceDepth < 0){
+          issues.push(makeIssue(code, block.innerStart + i, 'This } does not have a matching {.'));
+          braceDepth = 0;
+        }
+      }
+    }
+    if(braceDepth > 0){
+      issues.push(makeIssue(code, block.start, 'This CSS block needs a closing }.'));
+    }
+  });
+
+  scriptBlocks.forEach(block => {
+    try{ new Function(block.content); }
+    catch(error){
+      issues.push(makeIssue(code, block.start, `JavaScript syntax check: ${error.message}`));
+    }
+  });
+
+  return issues.slice(0, 6);
+}
+
+function renderCodeChecks(textarea){
+  const panel = document.getElementById(`${textarea.id}-checks`);
+  if(!panel) return;
+  const isBuildAlong = textarea.id.startsWith('ba');
+  const issues = [
+    ...validateLearnerCode(textarea.value, isBuildAlong),
+    ...(textarea._runtimeIssues || [])
+  ].slice(0, 6);
+  const errors = issues.filter(issue => issue.kind !== 'hint');
+
+  textarea.classList.toggle('has-code-errors', errors.length > 0);
+  panel.replaceChildren();
+  panel.className = `code-checks ${errors.length ? 'has-errors' : issues.length ? '' : 'clean'}`;
+
+  const title = document.createElement('strong');
+  title.className = 'check-title';
+  title.textContent = errors.length ? 'Red code checks — you can still run your code:' : issues.length ? 'Build-along clue:' : 'Looks good so far — try running it!';
+  panel.append(title);
+
+  if(!issues.length) return;
+  const list = document.createElement('ul');
+  issues.forEach(issue => {
+    const item = document.createElement('li');
+    item.className = issue.kind === 'hint' ? 'code-hint' : '';
+    item.textContent = `Line ${issue.line}: ${issue.message}`;
+    if(issue.lineText){
+      const line = document.createElement('span');
+      line.className = issue.kind === 'hint' ? 'error-line code-hint' : 'error-line';
+      line.textContent = issue.lineText;
+      item.append(line);
+    }
+    list.append(item);
+  });
+  panel.append(list);
+}
+
+function previewIdForTextarea(textarea){
+  if(/^try\d+$/.test(textarea.id)) return `out${textarea.id.slice(3)}`;
+  if(/^ba\d+$/.test(textarea.id)) return `baout${textarea.id.slice(2)}`;
+  if(textarea.id === 'diyCode') return 'diyOutput';
+  return '';
+}
+
+function setUpCodeChecks(){
+  document.querySelectorAll('textarea[id]').forEach(textarea => {
+    const previewId = previewIdForTextarea(textarea);
+    if(!previewId) return;
+    textarea.dataset.previewId = previewId;
+    const panel = document.createElement('div');
+    panel.id = `${textarea.id}-checks`;
+    panel.setAttribute('role', 'status');
+    panel.setAttribute('aria-live', 'polite');
+    textarea.insertAdjacentElement('afterend', panel);
+    textarea.addEventListener('input', () => {
+      textarea._runtimeIssues = [];
+      renderCodeChecks(textarea);
+    });
+    renderCodeChecks(textarea);
+  });
+}
+
+window.addEventListener('message', event => {
+  const data = event.data;
+  if(!data || data.type !== 'preview-runtime-error') return;
+  const textarea = Array.from(document.querySelectorAll('textarea[data-preview-id]'))
+    .find(item => item.dataset.previewId === data.outputId);
+  if(!textarea) return;
+  textarea._runtimeIssues = textarea._runtimeIssues || [];
+  const message = `Preview error: ${data.message}`;
+  if(!textarea._runtimeIssues.some(issue => issue.message === message)){
+    textarea._runtimeIssues.push({ line: 1, message, kind: 'error', lineText: '' });
+  }
+  renderCodeChecks(textarea);
+});
 
 // ===== progress tracking =====
 const sectionIds = ['s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11'];
