@@ -1481,7 +1481,15 @@ function runTry(taId, outId){
   const ta = document.getElementById(taId);
   const code = ta.value.replaceAll('&lt;','<').replaceAll('&gt;','>').replaceAll('&amp;','&');
   ta._runtimeIssues = [];
+  const isBuildAlong = ta.id.startsWith('ba');
+  const issues = validateLearnerCode(code, isBuildAlong);
   renderCodeChecks(ta);
+  const hasBlockingErrors = issues.some(issue => issue.kind !== 'hint');
+  if(hasBlockingErrors){
+    clearPreview(outId);
+    document.getElementById(outId).textContent = 'Fix the red code checks first, then run again.';
+    return;
+  }
   showPreview(outId, code);
   markDone(taId);
 }
@@ -1698,7 +1706,7 @@ function validateLearnerCode(code, isBuildAlong = false){
 
     if(headOpen && headClose){
       const headInnerTags = tags
-        .filter(tag => tag.index > headOpen.endIndex && tag.index < headClose.index)
+        .filter(tag => tag.index >= headOpen.endIndex && tag.index < headClose.index)
         .sort((a, b) => a.index - b.index);
       let cursor = headOpen.endIndex;
       let headDepth = 0;
@@ -1732,7 +1740,7 @@ function validateLearnerCode(code, isBuildAlong = false){
       }
 
       tags.forEach(tag => {
-        if(tag.index <= headOpen.endIndex || tag.index >= headClose.index) return;
+        if(tag.index < headOpen.endIndex || tag.index >= headClose.index) return;
         if(tag.closing || tag.selfClosing) return;
         if(headAllowedTags.has(tag.name)) return;
         issues.push(makeIssue(code, tag.index, `This <${tag.name}> tag should be in <body>, not inside <head>.`));
@@ -1892,7 +1900,17 @@ function answerQuiz(button, feedbackId, correct, message){
 }
 
 function runDiyCode(){
-  const code = document.getElementById('diyCode').value;
+  const ta = document.getElementById('diyCode');
+  const code = ta.value;
+  ta._runtimeIssues = [];
+  const issues = validateLearnerCode(code, false);
+  renderCodeChecks(ta);
+  const hasBlockingErrors = issues.some(issue => issue.kind !== 'hint');
+  if(hasBlockingErrors){
+    clearPreview('diyOutput');
+    document.getElementById('diyOutput').textContent = 'Fix the red code checks first, then run again.';
+    return;
+  }
   showPreview('diyOutput', code);
   doneSections.add('s10');
   updateProgress();
@@ -1923,6 +1941,7 @@ sectionIds.forEach(id=>{
 
 // Results stay empty until the student chooses Show Result or Check My Result.
 window.addEventListener('DOMContentLoaded', () => {
+  setUpCodeChecks();
   updateProgress();
 
   const proj1 = `<html><head><style>
