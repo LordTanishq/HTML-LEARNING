@@ -413,6 +413,45 @@
     padding:14px 20px; font-weight:800; display:flex; align-items:center; gap:10px;
   }
   .build-along .ba-body{ padding:20px; }
+  .build-along .code-editor{
+    width:100%; margin:18px 0 0; border:3px solid var(--ink); border-radius:12px;
+    overflow:hidden; background:#172033; box-shadow:4px 4px 0 rgba(27,27,47,.16);
+  }
+  .build-along .code-editor-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:10px 14px; background:var(--ink); color:#fff; font-size:14px;
+    font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  }
+  .build-along .code-editor-language{
+    color:#ffd2c2; font-family:Consolas,"SF Mono",Menlo,monospace; font-size:13px;
+  }
+  .build-along .code-editor textarea{
+    display:block; width:100%; min-height:142px; margin:0; padding:18px 20px;
+    border:0; border-radius:0; resize:vertical; overflow:auto; background:#172033;
+    color:#f8fafc; caret-color:#fbbf24; font:18px/1.6 Consolas,"SF Mono",Menlo,monospace;
+    white-space:pre; overflow-wrap:normal; tab-size:2;
+  }
+  .build-along #ba2{
+    min-height:122px;
+  }
+  .build-along .code-editor textarea:focus{
+    outline:3px solid var(--try); outline-offset:-3px;
+  }
+  .build-along .code-checks{
+    margin:0; border:0; border-top:1px solid rgba(255,255,255,.14); border-radius:0;
+    padding:10px 14px; background:#202b40; color:#dbeafe; font-size:14px;
+  }
+  .build-along .code-checks.clean{ color:#bbf7d0; background:#172f2b; }
+  .build-along .code-checks.has-errors{ color:#fecaca; background:#3b2029; }
+  .build-along .code-checks .check-title{ margin-bottom:4px; }
+  .build-along .code-checks ul{ margin:0; }
+  .build-along .code-checks li{ margin:4px 0; }
+  .build-along .code-checks .error-line{
+    border-left-color:#f87171; background:rgba(127,29,29,.35); color:#fee2e2;
+  }
+  .build-along .code-checks .code-hint{ color:#fde68a; }
+  .build-along .code-editor + .btnrow{ margin-top:14px; }
+  .build-along .hint{ margin:12px 0 0; font-size:15px; color:#7c3aed; }
   .ba-target{
     border:2px dashed var(--result); border-radius:10px; padding:16px; margin-bottom:16px; background:#f0fbfd;
   }
@@ -1194,7 +1233,9 @@
         </div>
       </div>
       <p style="font-size:15px;color:#555;">✏️ Fill in the missing <b class="mono">width</b> for <b class="mono">#three</b> so all 3 boxes add up to 100% (40% + 30% + <b>?</b>).</p>
-      <textarea id="ba1" data-original="&lt;style&gt;
+      <div class="code-editor">
+        <div class="code-editor-bar"><span>Your code</span><span class="code-editor-language">HTML + CSS</span></div>
+        <textarea id="ba1" aria-label="Build-Along 1 code editor" spellcheck="false" data-original="&lt;style&gt;
   #one   { float: left; width: 40%; background: #fecaca; }
   #two   { float: left; width: 30%; background: #bbf7d0; }
   #three { float: left; width: ____; background: #bfdbfe; }
@@ -1209,6 +1250,7 @@
 &lt;div id="one"&gt;Box 1&lt;/div&gt;
 &lt;div id="two"&gt;Box 2&lt;/div&gt;
 &lt;div id="three"&gt;Box 3&lt;/div&gt;</textarea>
+  </div>
       <div class="btnrow">
         <button onclick="runTry('ba1','baout1')">▶ Check My Result</button>
         <button class="reset" onclick="resetTry('ba1','baout1')">↺ Reset</button>
@@ -1229,9 +1271,12 @@
         </div>
       </div>
       <p style="font-size:15px;color:#555;">✏️ Fill in the missing heading tag and its matching closing tag.</p>
-      <textarea id="ba2" data-original="____&gt;GANESH UTSAV 2024&lt;/____&gt;
+      <div class="code-editor">
+        <div class="code-editor-bar"><span>Your code</span><span class="code-editor-language">HTML</span></div>
+        <textarea id="ba2" aria-label="Build-Along 2 code editor" spellcheck="false" data-original="____&gt;GANESH UTSAV 2024&lt;/____&gt;
 &lt;h3&gt;Lal baug Raja&lt;/h3&gt;">____&gt;GANESH UTSAV 2024&lt;/____&gt;
-&lt;h3&gt;Lal baug Raja&lt;/h3&gt;</textarea>
+    &lt;h3&gt;Lal baug Raja&lt;/h3&gt;</textarea>
+      </div>
       <div class="btnrow">
         <button onclick="runTry('ba2','baout2')">▶ Check My Result</button>
         <button class="reset" onclick="resetTry('ba2','baout2')">↺ Reset</button>
@@ -1249,7 +1294,9 @@
         <div style="width:100%;height:40px;background:skyblue;color:blue;border:3px solid blue;border-radius:8px;text-align:center;line-height:40px;font-weight:bold;font-family:Arial;">SUJAYA FOUNDATION</div>
       </div>
       <p style="font-size:15px;color:#555;">✏️ Fill in the missing CSS property to round the corners.</p>
-      <textarea id="ba3" data-original="&lt;style&gt;
+      <div class="code-editor">
+        <div class="code-editor-bar"><span>Your code</span><span class="code-editor-language">HTML + CSS</span></div>
+        <textarea id="ba3" aria-label="Build-Along 3 code editor" spellcheck="false" data-original="&lt;style&gt;
   #header {
     background-color: skyblue;
     color: blue;
@@ -1268,6 +1315,7 @@
   }
 &lt;/style&gt;
 &lt;div id="header"&gt;SUJAYA FOUNDATION&lt;/div&gt;</textarea>
+  </div>
       <div class="btnrow">
         <button onclick="runTry('ba3','baout3')">▶ Check My Result</button>
         <button class="reset" onclick="resetTry('ba3','baout3')">↺ Reset</button>
@@ -1848,7 +1896,8 @@ function setUpCodeChecks(){
     panel.id = `${textarea.id}-checks`;
     panel.setAttribute('role', 'status');
     panel.setAttribute('aria-live', 'polite');
-    textarea.insertAdjacentElement('afterend', panel);
+    const buildAlongActions = textarea.closest('.build-along')?.querySelector('.btnrow');
+    (buildAlongActions || textarea).insertAdjacentElement('afterend', panel);
     textarea.addEventListener('input', () => {
       textarea._runtimeIssues = [];
       renderCodeChecks(textarea);
